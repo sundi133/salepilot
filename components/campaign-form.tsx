@@ -1,4 +1,3 @@
-import { any } from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import EmailEventsDisplay from './email-event-display';
 
