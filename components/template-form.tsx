@@ -122,8 +122,8 @@ Best regards,
   
   {{sender_email_signature}}
     `
-    }
-  ];
+  }
+];
 
 function TemplateForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -159,10 +159,15 @@ function TemplateForm() {
     setEmailContent(selected ? selected.content : '');
   };
 
-  const handleTemplateChangeFollowUp = (event: React.ChangeEvent<HTMLSelectElement>, index: number) => {
+  const handleTemplateChangeFollowUp = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+    index: number
+  ) => {
     const selectedTemplateLabel = event.target.value;
-    const selectedTemplate = followUpTemplates.find(template => template.label === selectedTemplateLabel);
-    
+    const selectedTemplate = followUpTemplates.find(
+      (template) => template.label === selectedTemplateLabel
+    );
+
     updateFollowUp(index, 'template', selectedTemplateLabel);
     if (selectedTemplate) {
       updateFollowUp(index, 'content', selectedTemplate.content);
@@ -256,11 +261,11 @@ function TemplateForm() {
       const newFollowUp: FollowUpConfig = {
         delayDays: 1, // Assuming 1 day as a default delay
         content: '', // Default to empty
-        template: '', // No default template selected
+        template: '' // No default template selected
       };
       setFollowUps([...followUps, newFollowUp]);
     } else {
-      alert("Maximum of 4 follow-ups allowed.");
+      alert('Maximum of 4 follow-ups allowed.');
     }
   };
 
@@ -270,17 +275,19 @@ function TemplateForm() {
   };
 
   // Function to update follow-up fields
-  const updateFollowUp = (index: number, field: keyof FollowUpConfig, value: string | number) => {
+  const updateFollowUp = (
+    index: number,
+    field: keyof FollowUpConfig,
+    value: string | number
+  ) => {
     const newFollowUps = [...followUps];
     if (field === 'delayDays' && typeof value === 'number') {
-        newFollowUps[index][field] = value;
+      newFollowUps[index][field] = value;
     } else if (field === 'content' && typeof value === 'string') {
-        newFollowUps[index][field] = value;
+      newFollowUps[index][field] = value;
     }
     setFollowUps(newFollowUps);
   };
-
-  
 
   return (
     <div className="container mx-auto p-4 items-center justify-center">
@@ -422,10 +429,18 @@ function TemplateForm() {
             </div>
           </div>
         )}
-
       </form>
 
-      <form className="w-full border rounded-lg p-4 text-md bg-white shadow-sm" style={{ maxHeight: '80vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <form
+        className="w-full border rounded-lg p-4 text-md bg-white shadow-sm"
+        style={{
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}
+      >
         {/* Existing form elements */}
 
         {/* Render follow-up configurations */}
@@ -433,14 +448,22 @@ function TemplateForm() {
           <div key={index} className="mb-4">
             <div className="flex justify-between items-center">
               <h4 className="text-lg font-semibold">Follow-Up #{index + 1}</h4>
-              <button type="button" onClick={() => removeFollowUp(index)} className="text-red-500">Remove</button>
+              <button
+                type="button"
+                onClick={() => removeFollowUp(index)}
+                className="text-red-500"
+              >
+                Remove
+              </button>
             </div>
             <div className="mb-2">
               <label className="block text-gray-700">Delay (Days)</label>
               <input
                 type="number"
                 value={followUp.delayDays.toString()}
-                onChange={(e) => updateFollowUp(index, 'delayDays', parseInt(e.target.value))}
+                onChange={(e) =>
+                  updateFollowUp(index, 'delayDays', parseInt(e.target.value))
+                }
                 className="w-full border rounded-lg p-2"
                 min="1"
               />
@@ -463,7 +486,9 @@ function TemplateForm() {
               <label className="block text-gray-700">Email Content</label>
               <textarea
                 value={followUp.content}
-                onChange={(e) => updateFollowUp(index, 'content', e.target.value)}
+                onChange={(e) =>
+                  updateFollowUp(index, 'content', e.target.value)
+                }
                 className="w-full border rounded-lg p-2"
                 style={{ minHeight: '300px' }}
               ></textarea>
@@ -473,7 +498,11 @@ function TemplateForm() {
 
         <div className="flex flex-wrap w-full px-2 mb-4">
           {followUps.length < 4 && (
-            <button type="button" onClick={addFollowUp} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">
+            <button
+              type="button"
+              onClick={addFollowUp}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4"
+            >
               Add Follow-Up
             </button>
           )}
@@ -497,7 +526,6 @@ function TemplateForm() {
             {successMessage}
           </div>
         )}
-
       </form>
     </div>
   );

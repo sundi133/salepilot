@@ -4,6 +4,7 @@ import { useClerk } from '@clerk/nextjs';
 import { useAuth } from '@clerk/nextjs';
 import '../../app/css/globals.css';
 import axios from 'axios';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const CampaignDetails = ({ campaign_id: campaign_id }) => {
   const [campaign, setCampaign] = useState([]);
@@ -147,9 +148,22 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
         </div>
       </div>
 
-      <h2 className="text-lg font-semibold mb-4">Email Events</h2>
+      <h2 className="text-lg font-semibold mb-4">Generated Emails</h2>
+      <div className="relative flex items-center w-full">
+        {' '}
+        <input
+          disabled={!session}
+          type="text"
+          placeholder="Search contacts... press enter to submit"
+          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          // onKeyDown={handleSearch}
+        />
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+        </div>
+      </div>
       {emailEvents.length > 0 ? (
-        <div className="space-y-6">
+        <div className="space-y-6 mt-4">
           {emailEvents.map((event) => (
             <div
               key={event.id}
