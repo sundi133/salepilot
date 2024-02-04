@@ -7,6 +7,12 @@ interface Contact {
   email: string;
 }
 
+interface FollowUpConfig {
+  delayDays: number;
+  content: string;
+  template?: string;
+}
+
 const emailTemplates = [
   {
     label: 'The Direct Approach',
@@ -80,6 +86,45 @@ Warmly,
   }
 ];
 
+const followUpTemplates = [
+  {
+    label: 'The Gentle Reminder',
+    content: `Hi {{firstName}},
+
+I hope this message finds you well! A little while ago, we discussed how our email marketing platform could empower you as {{jobTitle}} at {{company}}, enabling you to achieve remarkable marketing success. I'm reaching out to see if you've had a chance to consider our conversation and how our solutions can be tailored to meet {{company_website}}'s unique needs in a {{tone}} manner.
+
+We understand how busy you must be, but I believe a quick demo could really showcase the potential impact on your marketing strategies and results. It’s a great opportunity to see firsthand how our platform can simplify your efforts while maximizing engagement and ROI.
+
+{{ai_personalize}} message here, tailored for {{company_website}} in a {{tone}} manner based on {{recent_public_news}}.
+
+Could we schedule a brief call or demo at your convenience this week? Let me know what works best for you.
+
+Looking forward to your reply and hoping to partner with you to take {{company}}'s marketing to the next level.
+
+Best regards,
+
+{{sender_email_signature}}
+`
+  },
+  {
+    label: 'The Value Reminder',
+    content: `Hello {{firstName}},
+    
+  I hope you're doing well. I wanted to follow up on our recent conversation about how our email marketing platform can revolutionize {{company}}'s marketing strategies and results.
+  
+  {{ai_personalize}} message here, tailored for {{company_website}} in a {{tone}} manner based on {{recent_public_news}}.
+
+  Are there any questions or concerns I can address? Your feedback is invaluable, and we’re here to provide all the information you need to make the best decision for {{company}}.
+
+  Could we schedule a brief call or demo at your convenience this week? Let me know what works best for you.
+
+  Warm regards,
+  
+  {{sender_email_signature}}
+    `
+    }
+  ];
+
 function TemplateForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -101,6 +146,9 @@ function TemplateForm() {
   );
   const [minimumWords, setMinimumWords] = useState(100);
   const [maximumWords, setMaximumWords] = useState(200);
+  const [followUpDelay, setFollowUpDelay] = useState(1);
+  const [followUpContent, setFollowUpContent] = useState('');
+  const [showFollowUpConfig, setShowFollowUpConfig] = useState(false);
 
   // Update email content when the selected template changes
   const handleTemplateChange = (e: any) => {
@@ -109,6 +157,16 @@ function TemplateForm() {
     );
     setSelectedTemplate(e.target.value);
     setEmailContent(selected ? selected.content : '');
+  };
+
+  const handleTemplateChangeFollowUp = (event: React.ChangeEvent<HTMLSelectElement>, index: number) => {
+    const selectedTemplateLabel = event.target.value;
+    const selectedTemplate = followUpTemplates.find(template => template.label === selectedTemplateLabel);
+    
+    updateFollowUp(index, 'template', selectedTemplateLabel);
+    if (selectedTemplate) {
+      updateFollowUp(index, 'content', selectedTemplate.content);
+    }
   };
 
   useEffect(() => {
@@ -145,6 +203,8 @@ function TemplateForm() {
     );
     setFilteredContacts(filtered);
   }, [searchTerm, contacts]);
+
+  const toggleFollowUpConfig = () => setShowFollowUpConfig(!showFollowUpConfig);
 
   const handleSubmit = async (e: any) => {
     console.log('selectedContacts', selectedContacts);
@@ -187,6 +247,40 @@ function TemplateForm() {
     '{{tone}}',
     '{{sender_email_signature}}'
   ];
+
+  const [followUps, setFollowUps] = useState<FollowUpConfig[]>([]);
+
+  // Function to add a new follow-up
+  const addFollowUp = () => {
+    if (followUps.length < 4) {
+      const newFollowUp: FollowUpConfig = {
+        delayDays: 1, // Assuming 1 day as a default delay
+        content: '', // Default to empty
+        template: '', // No default template selected
+      };
+      setFollowUps([...followUps, newFollowUp]);
+    } else {
+      alert("Maximum of 4 follow-ups allowed.");
+    }
+  };
+
+  // Function to remove a follow-up
+  const removeFollowUp = (index: number) => {
+    setFollowUps(followUps.filter((_, i) => i !== index));
+  };
+
+  // Function to update follow-up fields
+  const updateFollowUp = (index: number, field: keyof FollowUpConfig, value: string | number) => {
+    const newFollowUps = [...followUps];
+    if (field === 'delayDays' && typeof value === 'number') {
+        newFollowUps[index][field] = value;
+    } else if (field === 'content' && typeof value === 'string') {
+        newFollowUps[index][field] = value;
+    }
+    setFollowUps(newFollowUps);
+  };
+
+  
 
   return (
     <div className="container mx-auto p-4 items-center justify-center">
@@ -329,7 +423,60 @@ function TemplateForm() {
           </div>
         )}
 
+      </form>
+
+      <form className="w-full border rounded-lg p-4 text-md bg-white shadow-sm" style={{ maxHeight: '80vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Existing form elements */}
+
+        {/* Render follow-up configurations */}
+        {followUps.map((followUp, index) => (
+          <div key={index} className="mb-4">
+            <div className="flex justify-between items-center">
+              <h4 className="text-lg font-semibold">Follow-Up #{index + 1}</h4>
+              <button type="button" onClick={() => removeFollowUp(index)} className="text-red-500">Remove</button>
+            </div>
+            <div className="mb-2">
+              <label className="block text-gray-700">Delay (Days)</label>
+              <input
+                type="number"
+                value={followUp.delayDays.toString()}
+                onChange={(e) => updateFollowUp(index, 'delayDays', parseInt(e.target.value))}
+                className="w-full border rounded-lg p-2"
+                min="1"
+              />
+            </div>
+            <div>
+              <select
+                value={followUp.template}
+                onChange={(e) => handleTemplateChangeFollowUp(e, index)}
+                className="w-full border rounded-lg p-2 mb-2"
+              >
+                <option value="">Select a Template</option>
+                {followUpTemplates.map((template) => (
+                  <option key={template.label} value={template.label}>
+                    {template.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700">Email Content</label>
+              <textarea
+                value={followUp.content}
+                onChange={(e) => updateFollowUp(index, 'content', e.target.value)}
+                className="w-full border rounded-lg p-2"
+                style={{ minHeight: '300px' }}
+              ></textarea>
+            </div>
+          </div>
+        ))}
+
         <div className="flex flex-wrap w-full px-2 mb-4">
+          {followUps.length < 4 && (
+            <button type="button" onClick={addFollowUp} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">
+              Add Follow-Up
+            </button>
+          )}
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             type="button"
@@ -350,6 +497,7 @@ function TemplateForm() {
             {successMessage}
           </div>
         )}
+
       </form>
     </div>
   );
