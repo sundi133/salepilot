@@ -5,14 +5,15 @@ import { generate } from 'playht';
 import OpenAI from 'openai';
 import { get } from 'http';
 const prisma = require('../../../components/prisma-client');
-const playwright = require('playwright-aws-lambda');
+const playwright = require('playwright');
 
 const maxTokens = 3000;
 
 const getWebsiteSummary = async (website) => {
-  let chromium = await playwright.launchChromium();
-  const browser = await chromium.newContext();
-
+  const browser = await playwright.chromium.launch({
+    headless: true, // Set to false if you want to see the browser UI
+    timeout: 10000
+  });
   const page = await browser.newPage();
   await page.goto(website);
 

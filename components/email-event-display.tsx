@@ -28,51 +28,6 @@ interface CopiedStatuses {
   [key: number]: boolean;
 }
 
-const EmailEventCard: React.FC<EmailEventCardProps> = ({
-  event,
-  onSend,
-  onCopy
-}) => {
-  const handleSend = () => onSend(event);
-  const handleCopy = () => {
-    navigator.clipboard.writeText(event.eventContent);
-    onCopy(event);
-  };
-
-  return (
-    <div className="bg-white p-4 shadow rounded-lg mb-4">
-      <div className="mb-2 text-gray-900">
-        <strong>To:</strong> {event.contact.email}
-      </div>
-      <div className="mb-2 text-gray-600">
-        <strong>Subject:</strong> {event.eventType}
-      </div>
-      <div className="mb-4 text-gray-700">
-        <strong>Message:</strong>
-        <div
-          dangerouslySetInnerHTML={{
-            __html: event.eventContent.replace(/\n\n/g, '<br /><br />')
-          }}
-        ></div>
-      </div>
-      <div className="text-right">
-        <button
-          onClick={() => navigator.clipboard.writeText(event.eventContent)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded mr-2"
-        >
-          Copy
-        </button>
-        <button
-          onClick={handleSend}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded"
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
   campaignId
 }) => {
@@ -80,68 +35,65 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [campaign, setCampaign] = useState<any>({});
   const [stopFetch, setStopFetch] = useState(false);
+  const [campaignContacts, setCampaignContacts] = useState(-1);
+
+  const fetchEmailEvents = async () => {
+    if (stopFetch) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/email-events?campaignId=${campaignId}`);
+      if (!response.ok) throw new Error('Failed to fetch email events.');
+      const emailData = await response.json();
+      setEmailEvents(emailData);
+      if (campaignContacts === emailData.length) {
+        setStopFetch(true); // Stops further fetching if condition is met
+      }
+      console.log('emailEvents.length:', emailData.length);
+      console.log('campaignContacts:', campaignContacts);
+    } catch (error) {
+      console.error('Error fetching email events:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchCampaign = async () => {
       setIsLoading(true);
       try {
         const response = await fetch(`/api/campaigns?campaignId=${campaignId}`);
-        if (!response.ok) throw new Error('Failed to fetch email events.');
+        if (!response.ok) throw new Error('Failed to fetch campaign data.');
         const data = await response.json();
         if (data.length > 0) {
           setCampaign(data[0]);
+          setCampaignContacts(data[0].numUsers);
         }
       } catch (error) {
-        console.error('Error fetching email events:', error);
+        console.error('Error fetching campaign data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
-    const fetchEmailEvents = async () => {
-      if (stopFetch) {
-        return;
-      }
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `/api/email-events?campaignId=${campaignId}`
-        );
-        if (!response.ok) throw new Error('Failed to fetch email events.');
-        const data = await response.json();
-        setEmailEvents(data);
-        if (campaign.numUsers === emailEvents.length) {
-          setStopFetch(true);
-        }
-        console.log('emailEvents.length:', emailEvents.length);
-        console.log('campaign.numUsers:', campaign.numUsers);
-      } catch (error) {
-        console.error('Error fetching email events:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    console.log('campaignContacts updated:', campaignContacts);
 
     fetchCampaign();
-    fetchEmailEvents();
-
-    const intervalId = setInterval(fetchEmailEvents, 10000);
-    return () => clearInterval(intervalId);
-  }, [campaignId]);
+    // Start interval only after the campaign data is fetched
+    if (campaignContacts !== -1) {
+        const intervalId = stopFetch ? null : setInterval(fetchEmailEvents, 10000);
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }
+   
+  }, [campaignId, stopFetch, campaignContacts]); // Added stopFetch to useEffect dependencies
 
   const handleSendEmail = (event: EmailEvent) => {
     console.log('Sending email:', event);
   };
 
   const [copiedStatuses, setCopiedStatuses] = useState<CopiedStatuses>({});
-
-  //   const handleCopy = (event: EmailEvent) => {
-  //     navigator.clipboard.writeText(event.eventContent)
-  //       .then(() => {
-  //         setCopied(true); // Set copied to true when the text is successfully copied
-  //         setTimeout(() => setCopied(false), 2000); // Reset copied status after 2 seconds
-  //       })
-  //       .catch(error => console.error('Copy failed', error));
-  //   };
 
   const handleCopy = (eventId: number, event: EmailEvent) => {
     navigator.clipboard
