@@ -124,35 +124,37 @@ function ContactList({ searchTerm }: { searchTerm: string }) {
           </thead>
           <tbody className="bg-white">
             {objects.map((campaign: any) => (
-              <React.Fragment key={campaign.id}>
-                <tr
-                  onClick={() => handleRowClick(campaign)}
-                  className="hover:bg-gray-100 cursor-pointer"
-                >
-                  <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {campaign.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {campaign.status}
-                  </td>
-                  <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {new Date(campaign.createdAt).toLocaleTimeString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {campaign.template.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    <a
-                      href={`/campaign/${campaign.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-800"
-                    >
-                      link
-                    </a>
-                  </td>
-                </tr>
-              </React.Fragment>
+              <tr
+                onClick={() => handleRowClick(campaign)}
+                className="hover:bg-gray-100 cursor-pointer"
+              >
+                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
+                  {campaign.name}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
+                  {campaign.status}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
+                  {new Date(campaign.createdAt).toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
+                  {campaign.template.name.lenght > 32
+                    ? campaign.template.name.substring(0, 32) + '...'
+                    : campaign.template.name}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
+                  <a
+                    href={`/campaign/${campaign.id}`}
+                    target="_blank"
+                    className="text-blue-500 hover:text-blue-800"
+                  >
+                    <FontAwesomeIcon
+                      icon={faChevronCircleRight}
+                      className="text-sm text-gray-900 hover:text-blue-500"
+                    />
+                  </a>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>
