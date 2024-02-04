@@ -13,7 +13,6 @@ const getWebsiteSummary = async (website) => {
     headless: true, // Set to false if you want to see the browser UI
     timeout: 10000
   });
-  console.log('website', website);
   const page = await browser.newPage();
   await page.goto(website);
 
@@ -29,17 +28,12 @@ const getWebsiteSummary = async (website) => {
   // Read the body text of the page
   const bodyText = await page.$eval('body', (el) => el.innerText);
 
-  console.log(`Title: ${title}`);
-  console.log(`Description: ${description}`);
-  console.log(`Body Text: ${bodyText}`);
-
   const websiteSummary = `
   Title: ${title}
   Description: ${description}
   Body Text: ${bodyText}
   `;
   await browser.close();
-  console.log(websiteSummary);
   return websiteSummary;
 };
 
@@ -94,13 +88,16 @@ const generateContent = async (campaign, templateId, contactId, key) => {
   const websiteContent = await getWebsiteSummary(website);
   const websiteSummary = await getSummary(websiteContent, key);
   const templateContent = template.content;
+  const minWords = template.minWords || 150;
+  const maxWords = template.maxWords || 300;
   const userPrompt = `Generate an email to send to ${firstName} using the provided template.
   The email should be personalized to the recipient and should be professional.
   The recipient should be interested in the email and should be willing to respond to it.
   The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
   The summary of the company website is as follows:
   ${websiteSummary}
-  Make sure the make the email personalized as per the recipient and the company, company details and how our company can help them.
+  **Make sure the make the email personalized as per the recipient and the company, company details and how our company can help them.
+  **Make sure the number of words is between ${minWords} and ${maxWords}   
   `;
 
   const openai = new OpenAI({
@@ -171,8 +168,6 @@ export default async function handler(req, res) {
       });
 
       contactIds.forEach(async (contactId) => {
-        console.log(contactId);
-
         const emailContent = await generateContent(
           campaign,
           templateId,
@@ -189,7 +184,6 @@ export default async function handler(req, res) {
           userId
         };
         addEmailEvent(tuple);
-        console.log(tuple);
       });
     } catch (error) {
       console.error('Error adding Template:', error);

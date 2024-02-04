@@ -159,10 +159,32 @@ function ContactList({ searchTerm }: { searchTerm: string }) {
                     {contact.jobTitle ? contact.jobTitle : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {contact.companyWebsite ? contact.companyWebsite : 'N/A'}
+                    {contact.companyWebsite ? (
+                      <a
+                        href={contact.companyWebsite}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:text-blue-800"
+                      >
+                        {contact.companyWebsite}
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {contact.linkedIn ? contact.linkedIn : 'N/A'}
+                    {contact.linkedIn ? (
+                      <a
+                        href={contact.linkedIn}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:text-blue-800"
+                      >
+                        link
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
                   </td>
                 </tr>
               </React.Fragment>

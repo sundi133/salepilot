@@ -74,7 +74,6 @@ function CampaignForm() {
   }, [searchTerm, contacts]);
 
   const handleSubmit = async (e: any) => {
-    console.log('selectedContacts', selectedContacts);
     e.preventDefault();
     setIsLoading(true);
 
@@ -238,7 +237,6 @@ function CampaignForm() {
         )}
 
         {errorMessage && <div className="text-red-500">{errorMessage}</div>}
-
         {successMessage ? (
           <div className="w-full max-w-8xl mx-auto">
             {campaignId >= 0 && <EmailEventsDisplay campaignId={campaignId} />}

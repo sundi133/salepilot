@@ -99,6 +99,8 @@ function TemplateForm() {
   const [selectedTemplate, setSelectedTemplate] = useState(
     'The Direct Approach'
   );
+  const [minimumWords, setMinimumWords] = useState(100);
+  const [maximumWords, setMaximumWords] = useState(200);
 
   // Update email content when the selected template changes
   const handleTemplateChange = (e: any) => {
@@ -159,7 +161,9 @@ function TemplateForm() {
           name,
           campaignType,
           content: emailContent,
-          tone
+          tone,
+          minWords: minimumWords,
+          maxWords: maximumWords
         })
       });
       if (!response.ok) throw new Error('Network response was not ok.');
@@ -243,6 +247,32 @@ function TemplateForm() {
               <option value="neutral">Neutral</option>
               <option value="informative">Informative</option>
             </select>
+          </div>
+
+          <div className="w-full px-2 mb-4">
+            <label className="block text-gray-700 font-bold mb-1 mt-1">
+              Minimum Words
+            </label>
+            <input
+              type="number"
+              value={minimumWords}
+              onChange={(e) => setMinimumWords(parseInt(e.target.value))}
+              className="w-full border rounded-lg p-3 text-gray-700"
+              required
+            />
+          </div>
+
+          <div className="w-full px-2 mb-4">
+            <label className="block text-gray-700 font-bold mb-1 mt-1">
+              Maximum Words
+            </label>
+            <input
+              type="number"
+              value={maximumWords}
+              onChange={(e) => setMaximumWords(parseInt(e.target.value))}
+              className="w-full border rounded-lg p-3 text-gray-700"
+              required
+            />
           </div>
         </div>
 

@@ -11,14 +11,13 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const campaignId = req.query.campaignId;
-
     try {
       let whereCondition = {};
 
-      if (orgId) {
-        whereCondition = { orgId: orgId };
-      } else if (campaignId) {
+      if (campaignId) {
         whereCondition = { orgId: orgId, id: parseInt(campaignId) };
+      } else if (orgId) {
+        whereCondition = { orgId: orgId };
       } else {
         res.status(400).json({ error: 'Missing required parameters' });
       }
@@ -27,6 +26,9 @@ export default async function handler(req, res) {
         where: whereCondition,
         orderBy: {
           updatedAt: 'desc'
+        },
+        include: {
+          template: true
         }
       });
 

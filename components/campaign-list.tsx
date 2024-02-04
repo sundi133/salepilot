@@ -115,7 +115,10 @@ function ContactList({ searchTerm }: { searchTerm: string }) {
                 Created At
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Template ID
+                Template
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                View
               </th>
             </tr>
           </thead>
@@ -136,7 +139,17 @@ function ContactList({ searchTerm }: { searchTerm: string }) {
                     {new Date(campaign.createdAt).toLocaleTimeString()}
                   </td>
                   <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
-                    {campaign.templateId}
+                    {campaign.template.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
+                    <a
+                      href={`/campaign/${campaign.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-800"
+                    >
+                      link
+                    </a>
                   </td>
                 </tr>
               </React.Fragment>
