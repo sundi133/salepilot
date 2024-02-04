@@ -5,8 +5,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "playwright install"
+    "lint": "next lint"
   },
   "next": {
     "timeout": 1800000
@@ -68,6 +67,8 @@
     "pg-promise": "^11.5.4",
     "playht": "^0.9.6",
     "playwright": "^1.41.2",
+    "playwright-aws-lambda": "^0.10.0",
+    "playwright-core": "^1.41.2",
     "pocket-sphinx": "^0.0.1",
     "postcss": "^8.4.33",
     "prisma": "^5.9.1",
