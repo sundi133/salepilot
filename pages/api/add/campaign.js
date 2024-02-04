@@ -90,7 +90,8 @@ const generateContent = async (campaign, templateId, contactId, key) => {
   const templateContent = template.content;
   const minWords = template.minWords || 150;
   const maxWords = template.maxWords || 300;
-  const userPrompt = `Generate an email to send to ${firstName} using the provided template.
+  const tone = template.tone || 'professional';
+  const userPrompt = `Generate an email to send to ${firstName} using the provided template in a ${tone} tone. 
   The email should be personalized to the recipient and should be professional.
   The recipient should be interested in the email and should be willing to respond to it.
   The recepient title is ${contact.jobTitle} and the company name is ${contact.company}

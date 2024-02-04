@@ -213,8 +213,10 @@ function TemplateForm() {
               required
             />
           </div>
+        </div>
 
-          <div className="w-full px-2 mb-4">
+        <div className="flex flex-wrap -mx-2 mb-4">
+          <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
             <label className="block text-gray-700 font-bold mb-1 mt-1">
               Type
             </label>
@@ -230,7 +232,7 @@ function TemplateForm() {
             </select>
           </div>
 
-          <div className="w-full px-2 mb-4">
+          <div className="w-full md:w-1/2 px-2">
             <label className="block text-gray-700 font-bold mb-1 mt-1">
               Tone
             </label>
@@ -248,8 +250,10 @@ function TemplateForm() {
               <option value="informative">Informative</option>
             </select>
           </div>
+        </div>
 
-          <div className="w-full px-2 mb-4">
+        <div className="flex flex-wrap -mx-2 mb-4">
+          <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
             <label className="block text-gray-700 font-bold mb-1 mt-1">
               Minimum Words
             </label>
@@ -262,7 +266,7 @@ function TemplateForm() {
             />
           </div>
 
-          <div className="w-full px-2 mb-4">
+          <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
             <label className="block text-gray-700 font-bold mb-1 mt-1">
               Maximum Words
             </label>
