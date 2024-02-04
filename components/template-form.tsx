@@ -525,8 +525,6 @@ function TemplateForm() {
             {isLoading ? 'Submitting...' : 'Save Template'}
           </button>
         </div>
-
-        
       </form>
     </div>
   );

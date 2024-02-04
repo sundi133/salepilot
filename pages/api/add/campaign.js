@@ -4,38 +4,73 @@ import { clerkClient } from '@clerk/nextjs';
 import { generate } from 'playht';
 import OpenAI from 'openai';
 import { get } from 'http';
+const axios = require('axios');
+const cheerio = require('cheerio');
 const prisma = require('../../../components/prisma-client');
-const playwright = require('playwright');
 
 const maxTokens = 3000;
 
-const getWebsiteSummary = async (website) => {
-  const browser = await playwright.chromium.launch({
-    headless: true, // Set to false if you want to see the browser UI
-    timeout: 10000
+const fetchPageContent = async (url) => {
+  try {
+    // Fetching HTML content of the webpage using axios
+    const { data } = await axios.get(url);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching the URL: ${url}`, error);
+    throw error;
+  }
+};
+
+const extractInformation = (html) => {
+  // Loading the HTML content into cheerio to parse and query the document
+  const $ = cheerio.load(html);
+
+  // Extracting the title of the webpage
+  const title = $('title').text();
+  const description = $('meta[name="description"]').attr('content');
+  const ogTitle = $('meta[property="og:title"]').attr('content');
+  const ogDescription = $('meta[property="og:description"]').attr('content');
+
+  // extract all the text from the page
+  const bodyText = $('body').text();
+  let divTexts = [];
+  $('div').each((i, elem) => {
+    divTexts.push($(elem).text().trim());
   });
-  const page = await browser.newPage();
-  await page.goto(website);
 
-  // Read the title of the page
-  const title = await page.title();
+  let pTexts = [];
+  $('p').each((i, elem) => {
+    pTexts.push($(elem).text().trim());
+  });
 
-  // Read the description of the page
-  const description = await page.$eval(
-    'meta[name="description"]',
-    (el) => el.content
-  );
+  let aTexts = [];
+  $('a').each((i, elem) => {
+    aTexts.push($(elem).text().trim());
+  });
 
-  // Read the body text of the page
-  const bodyText = await page.$eval('body', (el) => el.innerText);
+  let h1Texts = [];
+  $('h1').each((i, elem) => {
+    h1Texts.push($(elem).text().trim());
+  });
 
-  const websiteSummary = `
-  Title: ${title}
-  Description: ${description}
-  Body Text: ${bodyText}
+  let h2Texts = [];
+  $('h2').each((i, elem) => {
+    h2Texts.push($(elem).text().trim());
+  });
+
+  return `
+  Title: ${title} ${ogTitle}
+  Description: ${description} ${ogDescription}
+  Body Text: ${bodyText} ${divTexts.join(' ')} ${pTexts.join(
+    ' '
+  )} ${aTexts.join(' ')} ${h1Texts.join(' ')} ${h2Texts.join(' ')}
   `;
-  await browser.close();
-  return websiteSummary;
+};
+
+const getWebsiteSummary = async (url) => {
+  const htmlContent = await fetchPageContent(url);
+  const info = extractInformation(htmlContent);
+  return info;
 };
 
 const getSummary = async (content, key) => {

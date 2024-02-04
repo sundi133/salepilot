@@ -75,6 +75,8 @@ function CampaignForm() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -197,6 +199,31 @@ function CampaignForm() {
         </div>
 
         <div className="flex flex-wrap w-full px-2 mb-2">
+          {successMessage && (
+            <div className="w-full px-2 mb-2">
+              <div className="text-blue-500">{successMessage}</div>
+            </div>
+          )}
+          {selectedContacts.length === 0 && (
+            <div className="w-full px-2 mb-2">
+              <li key="no-contacts">No contacts selected</li>
+            </div>
+          )}
+
+          {selectedContacts.length > 0 && (
+            <div className="w-full px-2 mb-2">
+              {selectedContacts.length > 0 && (
+                <p className="text-blue-500">
+                  Total contacts selected: {selectedContacts.length}
+                </p>
+              )}
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="w-full px-2 mb-2 text-red-500">{errorMessage}</div>
+          )}
+
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             type="button"
@@ -205,38 +232,8 @@ function CampaignForm() {
           >
             {isLoading ? 'Submitting...' : 'Create'}
           </button>
-
-          {successMessage && (
-            <div className="w-full flex mb-2 mt-2">
-              <div className="text-blue-500">{successMessage}</div>
-            </div>
-          )}
         </div>
 
-        {selectedContacts.length === 0 && (
-          <li key="no-contacts">No contacts selected</li>
-        )}
-        {selectedContacts.length > 0 && (
-          <div className="w-full px-2 mb-2">
-            {/* <h3 className="text-gray-700 font-bold mb-2">Selected Contacts:</h3> */}
-            {/* {
-              selectedContacts.length <= maxContacts &&
-              selectedContacts.map((contact: any, index) => (
-                <li key={index} className="text-gray-700">
-                  {findContactIndexById(parseInt(contact))}
-                </li>
-              ))
-            } */}
-
-            {selectedContacts.length > 0 && (
-              <p className="text-blue-500">
-                Total contacts selected: {selectedContacts.length}
-              </p>
-            )}
-          </div>
-        )}
-
-        {errorMessage && <div className="text-red-500">{errorMessage}</div>}
         {successMessage ? (
           <div className="w-full max-w-8xl mx-auto">
             {campaignId >= 0 && <EmailEventsDisplay campaignId={campaignId} />}
