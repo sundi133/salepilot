@@ -1,0 +1,6 @@
+.next
+.next/
+.env
+fly.toml 
+.env.prod 
+node_modules
