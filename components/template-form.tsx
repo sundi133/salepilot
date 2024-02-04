@@ -496,6 +496,16 @@ function TemplateForm() {
           </div>
         ))}
 
+        {errorMessage && (
+          <div className="flex flex-wrap w-full px-2 mb-4 text-red-500">
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div className="flex flex-wrap w-full px-2 mb-4 text-green-500">
+            {successMessage}
+          </div>
+        )}
         <div className="flex flex-wrap w-full px-2 mb-4">
           {followUps.length < 4 && (
             <button
@@ -516,16 +526,7 @@ function TemplateForm() {
           </button>
         </div>
 
-        {errorMessage && (
-          <div className="flex flex-wrap w-full px-2 mb-4 text-red-500">
-            {errorMessage}
-          </div>
-        )}
-        {successMessage && (
-          <div className="flex flex-wrap w-full px-2 mb-4 text-green-500">
-            {successMessage}
-          </div>
-        )}
+        
       </form>
     </div>
   );
