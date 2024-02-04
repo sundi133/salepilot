@@ -5,6 +5,8 @@ import { useAuth } from '@clerk/nextjs';
 import '../../app/css/globals.css';
 import axios from 'axios';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 const CampaignDetails = ({ campaign_id: campaign_id }) => {
   const [campaign, setCampaign] = useState([]);
@@ -91,6 +93,39 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
     });
   };
 
+  const downloadEmailEventsCSV = () => {
+    const csvRows = [
+      // Define CSV headers
+      `"ID","Email","Company","Event Content"`
+    ];
+
+    // Iterate over email events and convert each to a CSV row
+    emailEvents.forEach((event) => {
+      const csvRow = [
+        `"${event.id}"`,
+        `"${event.contact.email}"`,
+        `"${event.contact.company}"`,
+        `"${event.eventContent.replace(/"/g, '""')}"` // Escape double quotes
+      ].join(',');
+      csvRows.push(csvRow);
+    });
+
+    // Convert rows to CSV string
+    const csvString = csvRows.join('\n');
+
+    // Create a Blob with CSV data
+    const blob = new Blob([csvString], { type: 'text/csv' });
+
+    // Create a link and trigger the download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'emails.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
       <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -162,6 +197,22 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
           <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
         </div>
       </div>
+      {emailEvents.length > 0 && (
+        <>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={downloadEmailEventsCSV}
+              className="px-4 py-2 bg-violet-500 text-white rounded hover:bg-violet-600 transition-colors duration-200 ease-in-out"
+            >
+              <FontAwesomeIcon icon={faDownload} /> Download CSV
+            </button>
+          </div>
+          <div className="space-y-6 mt-4">
+            {/* Existing map function for displaying email events */}
+          </div>
+        </>
+      )}
+
       {emailEvents.length > 0 ? (
         <div className="space-y-6 mt-4">
           {emailEvents.map((event) => (
