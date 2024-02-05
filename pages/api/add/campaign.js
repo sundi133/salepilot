@@ -7,12 +7,11 @@ import { get } from 'http';
 const axios = require('axios');
 const cheerio = require('cheerio');
 const prisma = require('../../../components/prisma-client');
-
+import apollo from '../../../components/utils/apollo';
 const maxTokens = 3000;
 
 const fetchPageContent = async (url) => {
   try {
-    // Fetching HTML content of the webpage using axios
     const { data } = await axios.get(url);
     return data;
   } catch (error) {
@@ -106,7 +105,77 @@ const getSummary = async (content, key) => {
   return result;
 };
 
-const generateContent = async (campaign, templateId, contactId, key) => {
+const generateEmailContent = async (key, templateContent, userPrompt) => {
+  const openai = new OpenAI({
+    apiKey: key
+  });
+
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `
+            You are an email generator who is reaching out to a prospect. You have been given a template to use for the email. The template is as follows:
+            ${templateContent}
+          `
+        },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      max_tokens: 1000,
+      model: 'gpt-4'
+    });
+
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error('Error generating email:', error);
+    throw error; // or return a default error message
+  }
+};
+
+const generateCommonAttributes = async (key, templateContent, userPrompt) => {
+  const openai = new OpenAI({
+    apiKey: key
+  });
+
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `
+          You are an common attributes extractor given data about two people. You have been given the employment data of both the sender and the receiver. 
+            ${templateContent}
+          `
+        },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      max_tokens: 600,
+      model: 'gpt-4'
+    });
+
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error('Error generating email:', error);
+    throw error; // or return a default error message
+  }
+};
+
+const generateContent = async (
+  campaign,
+  templateId,
+  contactId,
+  key,
+  creatorFirstName,
+  creatorLastName,
+  creatorEmail
+) => {
   const contact = await prisma.contact.findUnique({
     where: {
       id: parseInt(contactId)
@@ -120,6 +189,47 @@ const generateContent = async (campaign, templateId, contactId, key) => {
   });
 
   const firstName = contact.firstName || '';
+  const lastName = contact.lastName || '';
+  const email = contact.email || '';
+
+  const personReceiverData = JSON.stringify(
+    await apollo.fetchPersonData(firstName, lastName, email)
+  );
+  const personSenderData = JSON.stringify(
+    await apollo.fetchPersonData(
+      creatorFirstName,
+      creatorLastName,
+      creatorEmail
+    )
+  );
+
+  const systemMessage =
+    'You have to extract the common professional attributes between the two people. ';
+  const userMessage = `
+  **The sender's profile is as follows in JSON format: 
+  ### start of JSON
+  ${personSenderData}
+  ### end of JSON
+
+  **The receiver's profile is as follows in JSON format:
+  ### start of JSON
+  ${personReceiverData}
+  ### end of JSON
+
+  **Parse both the JSON data
+  **Generate the common professional attributes between the sender and the receiver based on employment data, location, and other professional attributes.
+  `;
+
+  const commonAttributes = await generateCommonAttributes(
+    key,
+    systemMessage,
+    userMessage
+  );
+
+  //console.log('Person Receiver Data:', personReceiverData);
+  //console.log('Person Sender Data:', personSenderData);
+  //console.log('Common Attributes:', commonAttributes);
+
   const website = contact.companyWebsite || '';
   const websiteContent = await getWebsiteSummary(website);
   const websiteSummary = await getSummary(websiteContent, key);
@@ -128,40 +238,18 @@ const generateContent = async (campaign, templateId, contactId, key) => {
   const maxWords = template.maxWords || 300;
   const tone = template.tone || 'professional';
   const userPrompt = `Generate an email to send to ${firstName} using the provided template in a ${tone} tone. 
-  The email should be personalized to the recipient and should be professional.
-  The recipient should be interested in the email and should be willing to respond to it.
-  The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
-  The summary of the company website is as follows:
-  ${websiteSummary}
+  **The email should be personalized to the recipient and should be professional.
+  **The email should have a personal touch based on the common attributes ${commonAttributes}.
+  **Make sure to mention about common professional attributes between the sender and the receiver in order of common company, roles, titles and other professional attributes.
   **Make sure the make the email personalized as per the recipient and the company, company details and how our company can help them.
-  **Make sure the number of words is between ${minWords} and ${maxWords}   
+  **The recipient should be interested in the email and should be willing to respond to it.
+  **The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
+  **The summary of the company website is as follows:
+  ${websiteSummary}
+  **Make sure the number of words is between ${minWords} and ${maxWords}
   `;
 
-  const openai = new OpenAI({
-    apiKey: key
-  });
-
-  const completion = await openai.chat.completions.create({
-    messages: [
-      {
-        role: 'system',
-        content: `
-          You are a email generator who is reaching out to a prospect. You have been given a template to use for the email. The template is as follows:
-          ${templateContent}
-
-        `
-      },
-      { role: 'user', content: userPrompt }
-    ],
-    temperature: 0,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    max_tokens: 1000,
-    model: 'gpt-4'
-  });
-
-  const result = completion.choices[0].message.content;
-
+  const result = await generateEmailContent(key, templateContent, userPrompt);
   return result;
 };
 
@@ -172,14 +260,15 @@ export default async function handler(req, res) {
     return;
   }
   const user = await clerkClient.users.getUser(userId);
-  const creatorEmail = user.emailAddresses[0].emailAddress;
+  const creatorEmail = 'sundi133@dropyacht.com'; // user.emailAddresses[0].emailAddress;
   if (!orgId) {
     res.status(401).json({
       error: 'Please create a organization to proceed furthur',
       code: 'ORG_NOT_FOUND'
     });
   }
-  const name = user.firstName + ' ' + user.lastName;
+  const creatorFirstName = user.firstName;
+  const creatorLastName = user.lastName;
 
   if (req.method === 'POST') {
     const data = req.body;
@@ -209,7 +298,10 @@ export default async function handler(req, res) {
           campaign,
           templateId,
           contactId,
-          key
+          key,
+          creatorFirstName,
+          creatorLastName,
+          creatorEmail
         );
         const tuple = {
           campaignId: campaign.id,
