@@ -154,9 +154,9 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
 
   if (!emailEvents.length) {
     return (
-      <div className="text-xl flex font-semibold text-blue-500 mb-2 mt-2">
+      <div className="text-xl flex font-semibold text-blue-500 mb-2">
         Generating Emails
-        <div className="flex ml-2">
+        <div className="flex ml-2 mt-2">
           <Dot delay={300} />
           <Dot delay={600} />
           <Dot delay={900} />

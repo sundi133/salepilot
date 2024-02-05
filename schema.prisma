@@ -35,6 +35,7 @@ model Contact {
   tags String?
   creatorEmail String?
   creatorName String?
+  apolloData      Json?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   EmailEvent      EmailEvent[]
@@ -101,6 +102,18 @@ model EmailEvent {
   updatedAt DateTime?   @updatedAt
 }
 
+model User {
+  id         Int      @id @default(autoincrement())
+  orgId String
+  userId String
+  apolloData Json?
+  creatorEmail String
+  creatorName String
+
+  createdAt DateTime?   @default(now())
+  updatedAt DateTime?   @updatedAt
+  
+}
 model CampaignMetric {
   id             Int      @id @default(autoincrement())
   campaignId     Int

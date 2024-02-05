@@ -8,8 +8,8 @@ if (!apolloApiKey) {
 export const fetchPersonData = (firstName, lastName, email) => {
   const data = {
     api_key: apolloApiKey,
-    first_name: firstName,
-    last_name: lastName,
+    //first_name: firstName,
+    //last_name: lastName,
     email: email
   };
 
@@ -23,7 +23,7 @@ export const fetchPersonData = (firstName, lastName, email) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log('Success:', data);
+      console.log('Success:', data);
       return data;
     })
     .catch((error) => {

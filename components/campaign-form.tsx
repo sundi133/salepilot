@@ -177,61 +177,65 @@ function CampaignForm() {
           </div>
         </div>
 
-        <div className="w-full px-2 mb-4">
-          <label className="block text-gray-700 font-bold mb-2">
-            Search Contacts
-          </label>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border rounded-lg p-3 text-gray-700 mb-4"
-            placeholder="Search by name or email..."
-          />
+        <div className="flex w-full px-2 mb-4 space-x-4">
+          <div className="flex-1">
+            <label className="block text-gray-700 font-bold mb-2">
+              Search Contacts
+            </label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full border rounded-lg p-3 text-gray-700 mb-4"
+              placeholder="Search by name or email..."
+            />
+          </div>
 
-          <label className="block text-gray-700 font-bold mb-2">
-            Select Contacts
-          </label>
-          <select
-            id="contactSelect"
-            multiple
-            value={selectedContacts}
-            onChange={(e) =>
-              setSelectedContacts(
-                Array.from(e.target.selectedOptions, (option) => option.value)
-              )
-            }
-            className="w-full border rounded-lg p-3 text-gray-700 h-40 overflow-y-scroll shadow"
-            required
-          >
-            {filteredContacts.map((contact: any) => (
-              <option key={contact.id} value={contact.id}>
-                {contact.firstName} {contact.lastName} - {contact.email}{' '}
-                {contact.company}
-              </option>
-            ))}
-          </select>
+          <div className="flex-1">
+            <label className="block text-gray-700 font-bold mb-2">
+              Select Contacts
+            </label>
+            <select
+              id="contactSelect"
+              multiple
+              value={selectedContacts}
+              onChange={(e) =>
+                setSelectedContacts(
+                  Array.from(e.target.selectedOptions, (option) => option.value)
+                )
+              }
+              className="w-full border rounded-lg p-3 text-gray-700 h-40 overflow-y-scroll shadow"
+              required
+            >
+              {filteredContacts.map((contact: any) => (
+                <option key={contact.id} value={contact.id}>
+                  {contact.firstName} {contact.lastName} - {contact.email}{' '}
+                  {contact.company}
+                </option>
+              ))}
+            </select>
+            {selectedContacts.length === 0 && (
+              <div className="w-full mb-2 mt-2">
+                <li key="no-contacts">No contacts selected</li>
+              </div>
+            )}
+
+            {selectedContacts.length > 0 && (
+              <div className="w-full mb-2 mt-2">
+                {selectedContacts.length > 0 && (
+                  <p className="text-blue-600">
+                    Total contacts selected: {selectedContacts.length}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap w-full mb-2">
           {successMessage && (
             <div className="w-full mb-2">
               <div className="text-blue-600">{successMessage}</div>
-            </div>
-          )}
-          {selectedContacts.length === 0 && (
-            <div className="w-full mb-2">
-              <li key="no-contacts">No contacts selected</li>
-            </div>
-          )}
-
-          {selectedContacts.length > 0 && (
-            <div className="w-full mb-2">
-              {selectedContacts.length > 0 && (
-                <p className="text-blue-600">
-                  Total contacts selected: {selectedContacts.length}
-                </p>
-              )}
             </div>
           )}
 

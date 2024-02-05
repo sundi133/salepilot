@@ -1,4 +1,8 @@
-import { addCampaign, addEmailEvent } from '../../../components/prismaService';
+import {
+  addCampaign,
+  addEmailEvent,
+  addUser
+} from '../../../components/prismaService';
 import { getAuth } from '@clerk/nextjs/server';
 import { clerkClient } from '@clerk/nextjs';
 import { generate } from 'playht';
@@ -174,7 +178,8 @@ const generateContent = async (
   key,
   creatorFirstName,
   creatorLastName,
-  creatorEmail
+  creatorEmail,
+  user
 ) => {
   const contact = await prisma.contact.findUnique({
     where: {
@@ -191,17 +196,49 @@ const generateContent = async (
   const firstName = contact.firstName || '';
   const lastName = contact.lastName || '';
   const email = contact.email || '';
+  console.log('Contact:', contact);
+  console.log('User:', user);
 
-  const personReceiverData = JSON.stringify(
-    await apollo.fetchPersonData(firstName, lastName, email)
-  );
-  const personSenderData = JSON.stringify(
-    await apollo.fetchPersonData(
-      creatorFirstName,
-      creatorLastName,
-      creatorEmail
-    )
-  );
+  const personReceiverData =
+    contact.apolloData !== null
+      ? contact.apolloData
+      : JSON.stringify(
+          await apollo.fetchPersonData(firstName, lastName, email)
+        );
+  if (!contact.apolloData) {
+    await prisma.contact.update({
+      where: {
+        id: parseInt(contactId)
+      },
+      data: {
+        apolloData: personReceiverData
+      }
+    });
+  }
+
+  const personSenderData =
+    user.apolloData !== null
+      ? user.apolloData
+      : JSON.stringify(
+          await apollo.fetchPersonData(
+            creatorFirstName,
+            creatorLastName,
+            creatorEmail
+          )
+        );
+  if (user.apolloData === null) {
+    console.log('Updating User Apollo Data:', personSenderData);
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        apolloData: personSenderData
+      }
+    });
+  } else {
+    console.log('User Apollo Data:', user.apolloData);
+  }
 
   const systemMessage =
     'You have to extract the common professional attributes between the two people. ';
@@ -219,16 +256,15 @@ const generateContent = async (
   **Parse both the JSON data
   **Generate the common professional attributes between the sender and the receiver based on employment data, location, and other professional attributes.
   `;
-
   const commonAttributes = await generateCommonAttributes(
     key,
     systemMessage,
     userMessage
   );
 
-  //console.log('Person Receiver Data:', personReceiverData);
-  //console.log('Person Sender Data:', personSenderData);
-  //console.log('Common Attributes:', commonAttributes);
+  console.log('Person Receiver Data:', personReceiverData);
+  console.log('Person Sender Data:', personSenderData);
+  console.log('Common Attributes:', commonAttributes);
 
   const website = contact.companyWebsite || '';
   const websiteContent = await getWebsiteSummary(website);
@@ -297,6 +333,27 @@ export default async function handler(req, res) {
         data: campaign
       });
 
+      let user = await prisma.user.findMany({
+        where: {
+          userId: userId,
+          orgId: orgId,
+          creatorEmail: creatorEmail
+        }
+      });
+      if (!user[0]) {
+        console.log('Create User:', user);
+
+        user = await addUser({
+          userId: userId,
+          orgId: orgId,
+          creatorEmail: creatorEmail,
+          creatorName: creatorFirstName + ' ' + creatorLastName
+        });
+      } else {
+        user = user[0];
+        console.log('User:', user);
+      }
+
       contactIds.forEach(async (contactId) => {
         const emailContent = await generateContent(
           campaign,
@@ -305,7 +362,8 @@ export default async function handler(req, res) {
           key,
           creatorFirstName,
           creatorLastName,
-          creatorEmail
+          creatorEmail,
+          user
         );
         const tuple = {
           campaignId: campaign.id,

@@ -15,6 +15,11 @@ const addTemplate = async (data) => {
   return result;
 };
 
+const addUser = async (data) => {
+  const result = prisma.user.create({ data });
+  return result;
+};
+
 const addEmailEvent = async (data) => {
   try {
     const emailEvent = await prisma.emailEvent.create({
@@ -27,4 +32,10 @@ const addEmailEvent = async (data) => {
   }
 };
 
-module.exports = { addContact, addCampaign, addTemplate, addEmailEvent };
+module.exports = {
+  addContact,
+  addCampaign,
+  addTemplate,
+  addEmailEvent,
+  addUser
+};
