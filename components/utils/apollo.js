@@ -23,7 +23,7 @@ export const fetchPersonData = (firstName, lastName, email) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log('Success:', data);
+      //console.log('Success:', data);
       return data;
     })
     .catch((error) => {
