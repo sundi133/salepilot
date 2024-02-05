@@ -11,6 +11,11 @@ interface Contact {
   companyWebsite: string;
 }
 const maxContacts = 10;
+interface Template {
+  id: number;
+  name: string;
+  content: string;
+}
 
 function CampaignForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +25,10 @@ function CampaignForm() {
   const [name, setName] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
   const [status, setStatus] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState(-1);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [templates, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+
   const [campaign, setCampaign] = useState(null);
   const [campaignId, setCampaignId] = useState<number>(-1);
   const [emailContent, setEmailContent] = useState(''); // State for email content
@@ -31,6 +37,34 @@ function CampaignForm() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
   const [creatorEmail, setCreatorEmail] = useState('');
+
+  const [emailError, setEmailError] = useState('');
+
+  // Function to validate the business email
+  const validateEmail = (email: string) => {
+    const freeEmailDomains = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'aol.com',
+      'outlook.com'
+    ];
+    const emailDomain = email.split('@')[1];
+
+    if (freeEmailDomains.includes(emailDomain)) {
+      setEmailError('Please use your business email address.');
+      return false;
+    } else {
+      setEmailError('');
+      return true;
+    }
+  };
+
+  const handleEmailChange = (e: string) => {
+    const email = e;
+    setCreatorEmail(email);
+    validateEmail(email);
+  };
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -88,7 +122,7 @@ function CampaignForm() {
         },
         body: JSON.stringify({
           name,
-          templateId: parseInt(selectedTemplate),
+          templateId: selectedTemplate,
           contacts: selectedContacts,
           status: 'created',
           numUsers: selectedContacts.length,
@@ -117,6 +151,13 @@ function CampaignForm() {
     const index = contacts.findIndex((contact) => contact.id === contactId);
     return contacts[index].email;
   }
+
+  const getTemplateContent = () => {
+    const template = templates.find((t) => t.id === selectedTemplate);
+    return template
+      ? template.content
+      : 'Please select a template to view its content.';
+  };
 
   return (
     <div className="container mx-auto p-4 items-center justify-center">
@@ -151,10 +192,13 @@ function CampaignForm() {
             <input
               type="text"
               value={creatorEmail}
-              onChange={(e) => setCreatorEmail(e.target.value)}
+              onChange={(e) => handleEmailChange(e.target.value)}
               className="w-full border rounded-lg p-3 text-gray-700"
               required
             />
+            {emailError && (
+              <p className="text-red-500 text-xs mt-1">{emailError}</p>
+            )}
           </div>
 
           <div className="w-full px-2 mb-4">
@@ -163,7 +207,7 @@ function CampaignForm() {
             </label>
             <select
               value={selectedTemplate}
-              onChange={(e) => setSelectedTemplate(e.target.value)}
+              onChange={(e) => setSelectedTemplate(parseInt(e.target.value))}
               className="w-full border rounded-lg p-3 text-gray-700"
               required
             >
@@ -174,6 +218,15 @@ function CampaignForm() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="mt-4">
+            <div className="px-2 py-4 border rounded-lg bg-gray-50 text-gray-700">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: getTemplateContent().replace(/\n\n/g, '<br /><br />')
+                }}
+              ></div>
+            </div>
           </div>
         </div>
 
