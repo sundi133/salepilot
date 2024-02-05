@@ -183,7 +183,7 @@ export default function Contact() {
       {successMessage && (
         <div className="mt-4 text-gray-900 text-sm rounded text-center justify-center items-center rounded">
           <div
-            className="flex justify-center items-center rounded bg-white text-blue-500 text-sm px-4 py-3"
+            className="flex justify-center items-center rounded bg-white text-blue-600 text-sm px-4 py-3"
             role="alert"
           >
             <p>{successMessage}</p>

@@ -198,22 +198,22 @@ function CampaignForm() {
           </select>
         </div>
 
-        <div className="flex flex-wrap w-full px-2 mb-2">
+        <div className="flex flex-wrap w-full mb-2">
           {successMessage && (
-            <div className="w-full px-2 mb-2">
-              <div className="text-blue-500">{successMessage}</div>
+            <div className="w-full mb-2">
+              <div className="text-blue-600">{successMessage}</div>
             </div>
           )}
           {selectedContacts.length === 0 && (
-            <div className="w-full px-2 mb-2">
+            <div className="w-full mb-2">
               <li key="no-contacts">No contacts selected</li>
             </div>
           )}
 
           {selectedContacts.length > 0 && (
-            <div className="w-full px-2 mb-2">
+            <div className="w-full mb-2">
               {selectedContacts.length > 0 && (
-                <p className="text-blue-500">
+                <p className="text-blue-600">
                   Total contacts selected: {selectedContacts.length}
                 </p>
               )}
@@ -225,7 +225,7 @@ function CampaignForm() {
           )}
 
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}

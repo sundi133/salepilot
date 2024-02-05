@@ -202,7 +202,7 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
           <div className="flex justify-end mt-4">
             <button
               onClick={downloadEmailEventsCSV}
-              className="px-4 py-2 bg-violet-500 text-white rounded hover:bg-violet-600 transition-colors duration-200 ease-in-out"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200 ease-in-out"
             >
               <FontAwesomeIcon icon={faDownload} /> Download CSV
             </button>
@@ -235,8 +235,8 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
                     }
                     className={`px-4 py-2 text-white rounded transition-colors duration-200 ease-in-out ${
                       copiedStatus[event.id]
-                        ? 'bg-green-500 hover:bg-green-600'
-                        : 'bg-blue-500 hover:bg-blue-600'
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-blue-600 hover:bg-blue-700'
                     }`}
                   >
                     {copiedStatus[event.id] ? 'Copied' : 'Copy'}

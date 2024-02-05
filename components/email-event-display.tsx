@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import '../app/css/globals.css';
 import Dot from './dot';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 interface Contact {
   email: string;
+  company: string;
 }
 
 interface EmailEvent {
@@ -116,12 +119,39 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
       .catch((error) => console.error('Copy failed', error));
   };
 
-  if (isLoading)
-    return (
-      <div className="text-3xl md:text-4xl font-semibold text-blue-500 mb-8 mt-4 shadow-lg p-2 bg-white-100 rounded-lg border border-white-200 hover:text-blue-700 hover:bg-blue-50 transition-colors duration-300 ease-in-out">
-        Loading Emails...
-      </div>
-    );
+  const downloadEmailEventsCSV = () => {
+    const csvRows = [
+      // Define CSV headers
+      `"ID","Email","Company","Event Content"`
+    ];
+
+    // Iterate over email events and convert each to a CSV row
+    emailEvents.forEach((event) => {
+      const csvRow = [
+        `"${event.id}"`,
+        `"${event.contact.email}"`,
+        `"${event.contact.company}"`,
+        `"${event.eventContent.replace(/"/g, '""')}"` // Escape double quotes
+      ].join(',');
+      csvRows.push(csvRow);
+    });
+
+    // Convert rows to CSV string
+    const csvString = csvRows.join('\n');
+
+    // Create a Blob with CSV data
+    const blob = new Blob([csvString], { type: 'text/csv' });
+
+    // Create a link and trigger the download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'emails.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!emailEvents.length) {
     return (
       <div className="text-xl flex justify-center items-center font-semibold text-blue-500 mb-2 mt-2">
@@ -156,6 +186,20 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
           </div>
         ) : null}
       </div>
+
+      {campaignContacts > 0 && emailEvents.length === campaignContacts ? (
+        <>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={downloadEmailEventsCSV}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 ease-in-out"
+            >
+              <FontAwesomeIcon icon={faDownload} /> Download CSV
+            </button>
+          </div>
+          <div className="space-y-6 mt-4"></div>
+        </>
+      ) : null}
       {emailEvents.map((event) => (
         <div className="bg-white p-4 shadow rounded-lg mb-4">
           <div className="mb-2 text-gray-900">
