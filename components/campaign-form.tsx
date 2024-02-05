@@ -222,9 +222,11 @@ function CampaignForm() {
           <div className="mt-4">
             <div className="px-2 py-4 border rounded-lg bg-gray-50 text-gray-700">
               <div
+                contentEditable
                 dangerouslySetInnerHTML={{
                   __html: getTemplateContent().replace(/\n\n/g, '<br /><br />')
                 }}
+                className="outline-none" // Remove outline on focus for aesthetic purposes
               ></div>
             </div>
           </div>
