@@ -260,7 +260,6 @@ export default async function handler(req, res) {
     return;
   }
   const user = await clerkClient.users.getUser(userId);
-  const creatorEmail = 'sundi133@dropyacht.com'; // user.emailAddresses[0].emailAddress;
   if (!orgId) {
     res.status(401).json({
       error: 'Please create a organization to proceed furthur',
@@ -272,6 +271,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const data = req.body;
+    const creatorEmail = data.creatorEmail
+      ? data.creatorEmail
+      : user.emailAddresses[0].emailAddress;
+    console.log('creatorEmail', creatorEmail);
     const contactIds = data.contacts;
     const templateId = data.templateId;
     const key = process.env.OPENAI_API_KEY;
@@ -284,6 +287,7 @@ export default async function handler(req, res) {
     data.numUsers = contactIds.length;
     delete data.templateId;
     delete data.contacts;
+    delete data.creatorEmail;
 
     try {
       const campaign = await addCampaign(data); // Use Prisma service to insert data

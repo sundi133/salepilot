@@ -30,6 +30,7 @@ function CampaignForm() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
+  const [creatorEmail, setCreatorEmail] = useState('');
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -90,7 +91,8 @@ function CampaignForm() {
           templateId: parseInt(selectedTemplate),
           contacts: selectedContacts,
           status: 'created',
-          numUsers: selectedContacts.length
+          numUsers: selectedContacts.length,
+          creatorEmail
         })
       });
       if (!response.ok) throw new Error('Network response was not ok.');
@@ -137,6 +139,19 @@ function CampaignForm() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full border rounded-lg p-3 text-gray-700"
+              required
+            />
+          </div>
+
+          <div className="w-full px-2 mb-4">
+            <label className="block text-gray-700 font-bold mb-2">
+              Your Business Email
+            </label>
+            <input
+              type="text"
+              value={creatorEmail}
+              onChange={(e) => setCreatorEmail(e.target.value)}
               className="w-full border rounded-lg p-3 text-gray-700"
               required
             />
@@ -224,14 +239,16 @@ function CampaignForm() {
             <div className="w-full px-2 mb-2 text-red-500">{errorMessage}</div>
           )}
 
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="button"
-            onClick={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Submitting...' : 'Create'}
-          </button>
+          {campaignId === -1 && (
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Submitting...' : 'Create'}
+            </button>
+          )}
         </div>
 
         {successMessage ? (

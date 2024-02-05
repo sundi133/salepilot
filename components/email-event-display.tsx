@@ -154,21 +154,19 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
 
   if (!emailEvents.length) {
     return (
-      <div className="text-xl flex justify-center items-center font-semibold text-blue-500 mb-2 mt-2">
-        <div className="text-xl flex justify-center items-center font-semibold text-blue-500 mb-2 mt-2">
-          Generating Emails
-          <div className="flex ml-2">
-            <Dot delay={300} />
-            <Dot delay={600} />
-            <Dot delay={900} />
-          </div>
+      <div className="text-xl flex font-semibold text-blue-500 mb-2 mt-2">
+        Generating Emails
+        <div className="flex ml-2">
+          <Dot delay={300} />
+          <Dot delay={600} />
+          <Dot delay={900} />
         </div>
       </div>
     );
   }
   return (
-    <div className="max-w-4xl mx-auto mt-2">
-      <div className="text-xl flex justify-center items-center font-semibold text-blue-500 mb-2 mt-2">
+    <div className="max-w-4xl mx-auto">
+      <div className="text-xl flex font-semibold text-blue-500 mb-2">
         {campaignContacts > 0 && emailEvents.length < campaignContacts
           ? 'Generating Emails'
           : 'Email Generation Completed'}
@@ -189,7 +187,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
 
       {campaignContacts > 0 && emailEvents.length === campaignContacts ? (
         <>
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end">
             <button
               onClick={downloadEmailEventsCSV}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 ease-in-out"
@@ -201,7 +199,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
         </>
       ) : null}
       {emailEvents.map((event) => (
-        <div className="bg-white p-4 shadow rounded-lg mb-4">
+        <div className="bg-white p-4 shadow rounded-lg mb-2">
           <div className="mb-2 text-gray-900">
             <strong>To:</strong> {event.contact.email}
           </div>
