@@ -196,8 +196,6 @@ const generateContent = async (
   const firstName = contact.firstName || '';
   const lastName = contact.lastName || '';
   const email = contact.email || '';
-  console.log('Contact:', contact);
-  console.log('User:', user);
 
   const personReceiverData =
     contact.apolloData !== null
@@ -227,7 +225,7 @@ const generateContent = async (
           )
         );
   if (user.apolloData === null) {
-    console.log('Updating User Apollo Data:', personSenderData);
+    //console.log('Updating User Apollo Data:', personSenderData);
     await prisma.user.update({
       where: {
         id: user.id
@@ -237,7 +235,7 @@ const generateContent = async (
       }
     });
   } else {
-    console.log('User Apollo Data:', user.apolloData);
+    //console.log('User Apollo Data:', user.apolloData);
   }
 
   const systemMessage =
@@ -262,9 +260,9 @@ const generateContent = async (
     userMessage
   );
 
-  console.log('Person Receiver Data:', personReceiverData);
-  console.log('Person Sender Data:', personSenderData);
-  console.log('Common Attributes:', commonAttributes);
+  // console.log('Person Receiver Data:', personReceiverData);
+  // console.log('Person Sender Data:', personSenderData);
+  // console.log('Common Attributes:', commonAttributes);
 
   const website = contact.companyWebsite || '';
   const websiteContent = await getWebsiteSummary(website);
@@ -286,7 +284,7 @@ const generateContent = async (
   `;
 
   const result = await generateEmailContent(key, templateContent, userPrompt);
-  return result;
+  return [result, commonAttributes];
 };
 
 export default async function handler(req, res) {
@@ -310,7 +308,6 @@ export default async function handler(req, res) {
     const creatorEmail = data.creatorEmail
       ? data.creatorEmail
       : user.emailAddresses[0].emailAddress;
-    console.log('creatorEmail', creatorEmail);
     const contactIds = data.contacts;
     const templateId = data.templateId;
     const key = process.env.OPENAI_API_KEY;
@@ -341,8 +338,6 @@ export default async function handler(req, res) {
         }
       });
       if (!user[0]) {
-        console.log('Create User:', user);
-
         user = await addUser({
           userId: userId,
           orgId: orgId,
@@ -351,11 +346,10 @@ export default async function handler(req, res) {
         });
       } else {
         user = user[0];
-        console.log('User:', user);
       }
 
       contactIds.forEach(async (contactId) => {
-        const emailContent = await generateContent(
+        const [emailContent, commonAttributes] = await generateContent(
           campaign,
           templateId,
           contactId,
@@ -372,7 +366,8 @@ export default async function handler(req, res) {
           eventType: 'Email Generated', // This should be the type of the event based on the template
           eventTime: new Date(), // Ensure eventTime is a Date object
           orgId,
-          userId
+          userId,
+          commonAttributes
         };
         addEmailEvent(tuple);
       });

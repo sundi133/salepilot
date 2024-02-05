@@ -14,7 +14,8 @@ interface EmailEvent {
   contact: Contact;
   eventType: string;
   eventContent: string;
-  eventTime: string; // Use string for simplicity, convert to Date for actual use
+  eventTime: string;
+  commonAttributes: string;
 }
 
 interface EmailEventCardProps {
@@ -200,20 +201,26 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
       ) : null}
       {emailEvents.map((event) => (
         <div className="bg-white p-4 shadow rounded-lg mb-2">
-          <div className="mb-2 text-gray-900">
-            <strong>To:</strong> {event.contact.email}
+          <div className="mb-4">
+            <span className="text-gray-900 font-semibold">To:</span>
+            <span className="text-gray-900 ml-2">{event.contact.email}</span>
           </div>
-          <div className="mb-2 text-gray-600">
-            <strong>Subject:</strong> {event.eventType}
+          <div className="mb-4">
+            <span className="text-gray-900 font-semibold">Subject:</span>
+            <span className="text-gray-900 ml-2">{event.eventType}</span>
           </div>
-          <div className="mb-4 text-gray-700">
-            <strong>Message:</strong>
+          <div className="mb-6">
+            <span className="text-gray-900 font-semibold block mb-2">
+              Message:
+            </span>
             <div
               dangerouslySetInnerHTML={{
                 __html: event.eventContent.replace(/\n\n/g, '<br /><br />')
               }}
+              className="text-gray-700 bg-gray-50 p-4 rounded-lg"
             ></div>
           </div>
+
           <div className="text-right">
             <button
               type="button"
@@ -233,6 +240,18 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
             >
               Send
             </button>
+          </div>
+
+          <hr className="border-t border-gray-300 my-4 mt-2" />
+
+          <div className="text-gray-700">
+            <span className="font-semibold block mb-2">Common Attributes:</span>
+            <div
+              className="text-sm bg-gray-50 p-4 rounded-lg"
+              dangerouslySetInnerHTML={{
+                __html: event.commonAttributes.replace(/\n\n/g, '<br /><br />')
+              }}
+            ></div>
           </div>
         </div>
       ))}
