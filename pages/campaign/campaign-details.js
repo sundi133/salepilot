@@ -84,16 +84,25 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
     }
   };
 
-  const [copiedStatus, setCopiedStatus] = useState({});
+  const handleCopy = (eventId, event) => {
+    navigator.clipboard
+      .writeText(event.eventContent)
+      .then(() => {
+        // Set the copied status for the specific event ID to true
+        setCopiedStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [eventId]: true
+        }));
 
-  const handleCopyContent = (eventId, eventContent) => {
-    navigator.clipboard.writeText(eventContent).then(() => {
-      // Set this event as copied
-      setCopiedStatus((prevStatus) => ({
-        ...prevStatus,
-        [eventId]: true
-      }));
-    });
+        // Optional: Reset copied status for this event ID after 2 seconds
+        setTimeout(() => {
+          setCopiedStatuses((prevStatuses) => ({
+            ...prevStatuses,
+            [eventId]: false
+          }));
+        }, 2000);
+      })
+      .catch((error) => console.error('Copy failed', error));
   };
 
   const downloadEmailEventsCSV = () => {
