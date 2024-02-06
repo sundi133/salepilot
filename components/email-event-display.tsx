@@ -3,10 +3,12 @@ import '../app/css/globals.css';
 import Dot from './dot';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import ProfileCard from './ProfileCard'; // Adjust the import path based on your file structure
 
 interface Contact {
   email: string;
   company: string;
+  apolloData: string;
 }
 
 interface EmailEvent {
@@ -159,8 +161,8 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
         Generating Emails
         <div className="flex ml-2 mt-2">
           <Dot delay={300} />
-          <Dot delay={600} />
-          <Dot delay={900} />
+          {/* <Dot delay={600} />
+          <Dot delay={900} /> */}
         </div>
       </div>
     );
@@ -180,8 +182,8 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
         {campaignContacts > 0 && emailEvents.length < campaignContacts ? (
           <div className="flex ml-2">
             <Dot delay={300} />
-            <Dot delay={600} />
-            <Dot delay={900} />
+            {/* <Dot delay={600} />
+            <Dot delay={900} /> */}
           </div>
         ) : null}
       </div>
@@ -242,9 +244,13 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
             </button>
           </div>
 
+          {event.contact?.apolloData && (
+            <ProfileCard data={JSON.parse(event.contact.apolloData)} />
+          )}
+
           <hr className="border-t border-gray-300 my-4 mt-2" />
 
-          <div className="text-gray-700">
+          {/* <div className="text-gray-700">
             <span className="font-semibold block mb-2">Common Attributes:</span>
             <div
               className="text-sm bg-gray-50 p-4 rounded-lg"
@@ -252,7 +258,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
                 __html: event.commonAttributes.replace(/\n\n/g, '<br /><br />')
               }}
             ></div>
-          </div>
+          </div> */}
         </div>
       ))}
     </div>

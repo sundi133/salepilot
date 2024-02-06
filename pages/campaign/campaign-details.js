@@ -7,6 +7,7 @@ import axios from 'axios';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import ProfileCard from '../../components/ProfileCard';
 
 const CampaignDetails = ({ campaign_id: campaign_id }) => {
   const [campaign, setCampaign] = useState([]);
@@ -15,6 +16,8 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [emailEvents, setEmailEvents] = useState([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [copiedStatuses, setCopiedStatuses] = useState({});
+
   const tableHeaderCellStyle =
     'px-4 py-2 leading-5 text-center bg-gray-50 text-sm text-gray-900 tracking-wider';
   const tableBodyCellStyle =
@@ -216,41 +219,70 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
       {emailEvents.length > 0 ? (
         <div className="space-y-6 mt-4">
           {emailEvents.map((event) => (
-            <div
-              key={event.id}
-              className="border border-gray-200 rounded-lg overflow-hidden shadow-lg"
-            >
-              <div className="bg-gray-100 p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold">{event.contact.email}</h3>
-                <p className="text-sm text-gray-600">{event.contact.company}</p>
+            <div className="bg-white p-4 shadow rounded-lg mb-2">
+              <div className="mb-4">
+                <span className="text-gray-900 font-semibold">To:</span>
+                <span className="text-gray-900 ml-2">
+                  {event.contact.email}
+                </span>
               </div>
-              <div className="bg-white p-4">
-                <div className="whitespace-pre-line text-gray-800 mb-4">
-                  {event.eventContent}
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <button
-                    onClick={() =>
-                      handleCopyContent(event.id, event.eventContent)
-                    }
-                    className={`px-4 py-2 text-white rounded transition-colors duration-200 ease-in-out ${
-                      copiedStatus[event.id]
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    {copiedStatus[event.id] ? 'Copied' : 'Copy'}
-                  </button>
-                  <button
-                    onClick={() =>
-                      console.log('Send functionality to be implemented')
-                    }
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200 ease-in-out"
-                  >
-                    Send
-                  </button>
-                </div>
+              <div className="mb-4">
+                <span className="text-gray-900 font-semibold">Subject:</span>
+                <span className="text-gray-900 ml-2">{event.eventType}</span>
               </div>
+              <div className="mb-6">
+                <span className="text-gray-900 font-semibold block mb-2">
+                  Message:
+                </span>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: event.eventContent.replace(/\n\n/g, '<br /><br />')
+                  }}
+                  className="text-gray-700 bg-gray-50 p-4 rounded-lg"
+                ></div>
+              </div>
+
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => handleCopy(event.id, event)}
+                  className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded mr-2 ${
+                    copiedStatuses[event.id]
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : ''
+                  }`}
+                >
+                  {copiedStatuses[event.id] ? 'Copied' : 'Copy'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSendEmail(event)}
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded"
+                >
+                  Send
+                </button>
+              </div>
+
+              {event.contact?.apolloData && (
+                <ProfileCard data={JSON.parse(event.contact.apolloData)} />
+              )}
+
+              <hr className="border-t border-gray-300 my-4 mt-2" />
+
+              {/* <div className="text-gray-700">
+                <span className="font-semibold block mb-2">
+                  Common Attributes:
+                </span>
+                <div
+                  className="text-sm bg-gray-50 p-4 rounded-lg"
+                  dangerouslySetInnerHTML={{
+                    __html: event.commonAttributes.replace(
+                      /\n\n/g,
+                      '<br /><br />'
+                    )
+                  }}
+                ></div>
+              </div> */}
             </div>
           ))}
         </div>
