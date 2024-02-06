@@ -179,7 +179,8 @@ const generateContent = async (
   creatorFirstName,
   creatorLastName,
   creatorEmail,
-  user
+  user,
+  emailTemplateContent
 ) => {
   const contact = await prisma.contact.findUnique({
     where: {
@@ -267,7 +268,7 @@ const generateContent = async (
   const website = contact.companyWebsite || '';
   const websiteContent = await getWebsiteSummary(website);
   const websiteSummary = await getSummary(websiteContent, key);
-  const templateContent = template.content;
+  const templateContent = emailTemplateContent;
   const minWords = template.minWords || 150;
   const maxWords = template.maxWords || 300;
   const tone = template.tone || 'professional';
@@ -278,6 +279,7 @@ const generateContent = async (
   **Make sure the make the email personalized as per the recipient and the company, company details and how our company can help them.
   **The recipient should be interested in the email and should be willing to respond to it.
   **The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
+  **The sender name is ${creatorFirstName} ${creatorLastName} and the sender email is ${creatorEmail}
   **The summary of the company website is as follows:
   ${websiteSummary}
   **Make sure the number of words is between ${minWords} and ${maxWords}
@@ -308,6 +310,7 @@ export default async function handler(req, res) {
     const creatorEmail = data.creatorEmail
       ? data.creatorEmail
       : user.emailAddresses[0].emailAddress;
+    const emailTemplateContent = data.emailContent;
     const contactIds = data.contacts;
     const templateId = data.templateId;
     const key = process.env.OPENAI_API_KEY;
@@ -321,6 +324,7 @@ export default async function handler(req, res) {
     delete data.templateId;
     delete data.contacts;
     delete data.creatorEmail;
+    delete data.emailContent;
 
     try {
       const campaign = await addCampaign(data); // Use Prisma service to insert data
@@ -357,7 +361,8 @@ export default async function handler(req, res) {
           creatorFirstName,
           creatorLastName,
           creatorEmail,
-          user
+          user,
+          emailTemplateContent
         );
         const tuple = {
           campaignId: campaign.id,

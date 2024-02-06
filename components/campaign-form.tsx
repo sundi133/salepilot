@@ -126,14 +126,15 @@ function CampaignForm() {
           contacts: selectedContacts,
           status: 'created',
           numUsers: selectedContacts.length,
-          creatorEmail
+          creatorEmail,
+          emailContent
         })
       });
       if (!response.ok) throw new Error('Network response was not ok.');
       const data = await response.json();
       setCampaign(data.data);
       setCampaignId(data.data.id);
-      setSuccessMessage('Campaign created successfully');
+      setSuccessMessage('Campaign created successfully, generating emails...');
     } catch (error) {
       setErrorMessage('Failed to create campaign.');
       console.error('There was an error!', error);
@@ -171,34 +172,36 @@ function CampaignForm() {
           justifyContent: 'space-between'
         }}
       >
-        <div className="flex flex-wrap -mx-2 mb-4">
-          <div className="w-full px-2 mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Campaign Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-lg p-3 text-gray-700"
-              required
-            />
-          </div>
+        <div>
+          <div className="flex flex-wrap -mx-2 mb-4">
+            <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+              <label className="block text-gray-700 font-bold mb-2">
+                Campaign Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border rounded-lg p-3 text-gray-700"
+                required
+              />
+            </div>
 
-          <div className="w-full px-2 mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Your Business Email
-            </label>
-            <input
-              type="text"
-              value={creatorEmail}
-              onChange={(e) => handleEmailChange(e.target.value)}
-              className="w-full border rounded-lg p-3 text-gray-700"
-              required
-            />
-            {emailError && (
-              <p className="text-red-500 text-xs mt-1">{emailError}</p>
-            )}
+            <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+              <label className="block text-gray-700 font-bold mb-2">
+                Your Business Email
+              </label>
+              <input
+                type="text"
+                value={creatorEmail}
+                onChange={(e) => handleEmailChange(e.target.value)}
+                className="w-full border rounded-lg p-3 text-gray-700"
+                required
+              />
+              {emailError && (
+                <p className="text-red-500 text-xs mt-1">{emailError}</p>
+              )}
+            </div>
           </div>
 
           <div className="w-full px-2 mb-4">
@@ -226,13 +229,14 @@ function CampaignForm() {
                 dangerouslySetInnerHTML={{
                   __html: getTemplateContent().replace(/\n\n/g, '<br /><br />')
                 }}
+                onClick={() => setEmailContent(getTemplateContent())}
                 className="outline-none" // Remove outline on focus for aesthetic purposes
               ></div>
             </div>
           </div>
         </div>
 
-        <div className="flex w-full px-2 mb-4 space-x-4">
+        <div className="flex w-full px-2 mb-4 space-x-4 mt-4">
           <div className="flex-1">
             <label className="block text-gray-700 font-bold mb-2">
               Search Contacts
@@ -244,6 +248,28 @@ function CampaignForm() {
               className="w-full border rounded-lg p-3 text-gray-700 mb-4"
               placeholder="Search by name or email..."
             />
+            <div className="flex flex-wrap w-full mb-2">
+              {successMessage && (
+                <div className="w-full mb-2">
+                  <div className="text-blue-600">{successMessage}</div>
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="w-full px-2 mb-2 text-red-500">
+                  {errorMessage}
+                </div>
+              )}
+
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Submitting...' : 'Create'}
+              </button>
+            </div>
           </div>
 
           <div className="flex-1">
@@ -287,7 +313,17 @@ function CampaignForm() {
           </div>
         </div>
 
-        <div className="flex flex-wrap w-full mb-2">
+        {successMessage ? (
+          <div className="w-full max-w-8xl mx-auto">
+            {campaignId >= 0 && <EmailEventsDisplay campaignId={campaignId} />}
+          </div>
+        ) : (
+          campaignId >= 0 && (
+            <div className="w-full max-w-8xl mx-auto">Generating email...</div>
+          )
+        )}
+
+        {/* <div className="flex flex-wrap w-full mb-2">
           {successMessage && (
             <div className="w-full mb-2">
               <div className="text-blue-600">{successMessage}</div>
@@ -298,27 +334,15 @@ function CampaignForm() {
             <div className="w-full px-2 mb-2 text-red-500">{errorMessage}</div>
           )}
 
-          {campaignId === -1 && (
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="button"
-              onClick={handleSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Submitting...' : 'Create'}
-            </button>
-          )}
-        </div>
-
-        {successMessage ? (
-          <div className="w-full max-w-8xl mx-auto">
-            {campaignId >= 0 && <EmailEventsDisplay campaignId={campaignId} />}
-          </div>
-        ) : (
-          campaignId >= 0 && (
-            <div className="w-full max-w-8xl mx-auto">Generating email...</div>
-          )
-        )}
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            type="button"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Submitting...' : 'Create'}
+          </button>
+        </div> */}
       </form>
     </div>
   );
