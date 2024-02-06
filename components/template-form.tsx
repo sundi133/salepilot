@@ -18,11 +18,11 @@ const emailTemplates = [
     label: 'The Direct Approach',
     content: `Hey {{firstName}},
 
-Ready to boost {{company}}'s marketing game to unprecedented levels? Your role as {{jobTitle}} is pivotal, and with our email marketing platform, you're equipped to drive remarkable results.
+{{Start with a personal message addressing {{firstName}}{{lastName}} working at {{company}}
 
-{{ai_personalize}} tailored for {{company_website}} in a {{tone}} manner.
+{{ai_personalize}} tailored for {{company}} in a {{tone}} manner.
 
-Let's chat about how our platform can revolutionize your marketing. How about a quick demo?
+How about a quick demo to see how we can help you achieve your budget goals?
 
 Best,
 {{sender_email_signature}}
