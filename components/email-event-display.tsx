@@ -202,67 +202,49 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
           <div className="space-y-6 mt-4"></div>
         </>
       ) : null}
-      {emailEvents.map((event) => (
-        <div className="bg-white p-4 shadow rounded-lg mb-2">
+      {emailEvents.map((event, index) => (
+        <div key={index} className="bg-white p-6 shadow rounded-lg">
           {event.contact?.apolloData && (
             <ProfileCard
               data={JSON.parse(event.contact.apolloData)}
-              organic_results={JSON.parse(event.contact.scaleserpData)}
+              organic_results={
+                event.contact.scaleserpData
+                  ? JSON.parse(event.contact.scaleserpData)
+                  : null
+              }
             />
           )}
+          <div className="bg-white p-6 shadow rounded-lg overflow-hidden">
+            <h2 className="text-xl font-semibold">Communication:</h2>
 
-          <div className="mb-2 mt-4">
-            <span className="text-gray-900 font-semibold">To:</span>
-            <span className="text-gray-900 ml-2">{event.contact.email}</span>
-          </div>
-          <div className="mb-4">
-            <span className="text-gray-900 font-semibold">Subject:</span>
-            <span className="text-gray-900 ml-2">{event.eventType}</span>
-          </div>
-          <div className="mb-6">
-            <span className="text-gray-900 font-semibold block mb-2">
-              Message:
-            </span>
+            <div className="text-gray-800 mt-2">To: {event.contact.email}</div>
             <div
+              className="text-gray-700 bg-gray-50 p-4 rounded-lg mt-4"
               dangerouslySetInnerHTML={{
                 __html: event.eventContent.replace(/\n\n/g, '<br /><br />')
               }}
-              className="text-gray-700 bg-gray-50 p-4 rounded-lg"
             ></div>
+            <div key={event.id} className="bg-white p-4 shadow rounded-lg mb-2">
+              <div className="text-right space-x-2 mt-4">
+                <button
+                  onClick={() => handleCopy(event.id, event)}
+                  className={`bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded ${
+                    copiedStatuses[event.id]
+                      ? 'bg-green-600 hover:bg-green-700'
+                      : ''
+                  }`}
+                >
+                  {copiedStatuses[event.id] ? 'Copied' : 'Copy'}
+                </button>
+                <button
+                  onClick={() => handleSendEmail(event)}
+                  className="bg-green-600 hover:bg-green-700 text-white py-1 px-4 rounded"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
           </div>
-
-          <div className="text-right">
-            <button
-              type="button"
-              onClick={() => handleCopy(event.id, event)}
-              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded mr-2 ${
-                copiedStatuses[event.id]
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : ''
-              }`}
-            >
-              {copiedStatuses[event.id] ? 'Copied' : 'Copy'}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSendEmail(event)}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded"
-            >
-              Send
-            </button>
-          </div>
-
-          <hr className="border-t border-gray-300 my-4 mt-2" />
-
-          {/* <div className="text-gray-700">
-            <span className="font-semibold block mb-2">Common Attributes:</span>
-            <div
-              className="text-sm bg-gray-50 p-4 rounded-lg"
-              dangerouslySetInnerHTML={{
-                __html: event.commonAttributes.replace(/\n\n/g, '<br /><br />')
-              }}
-            ></div>
-          </div> */}
         </div>
       ))}
     </div>
