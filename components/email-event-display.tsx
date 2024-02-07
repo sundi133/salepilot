@@ -9,6 +9,7 @@ interface Contact {
   email: string;
   company: string;
   apolloData: string;
+  scaleserpData: string;
 }
 
 interface EmailEvent {
@@ -203,7 +204,14 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
       ) : null}
       {emailEvents.map((event) => (
         <div className="bg-white p-4 shadow rounded-lg mb-2">
-          <div className="mb-4">
+          {event.contact?.apolloData && (
+            <ProfileCard
+              data={JSON.parse(event.contact.apolloData)}
+              organic_results={JSON.parse(event.contact.scaleserpData)}
+            />
+          )}
+
+          <div className="mb-2 mt-4">
             <span className="text-gray-900 font-semibold">To:</span>
             <span className="text-gray-900 ml-2">{event.contact.email}</span>
           </div>
@@ -243,10 +251,6 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
               Send
             </button>
           </div>
-
-          {event.contact?.apolloData && (
-            <ProfileCard data={JSON.parse(event.contact.apolloData)} />
-          )}
 
           <hr className="border-t border-gray-300 my-4 mt-2" />
 

@@ -12,6 +12,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const prisma = require('../../../components/prisma-client');
 import apollo from '../../../components/utils/apollo';
+import scaleserp from '../../../components/utils/scaleserp';
 const maxTokens = 3000;
 
 const fetchPageContent = async (url) => {
@@ -161,7 +162,7 @@ const generateCommonAttributes = async (key, templateContent, userPrompt) => {
       frequency_penalty: 0,
       presence_penalty: 0,
       max_tokens: 600,
-      model: 'gpt-4'
+      model: 'gpt-3.5-turbo-0125'
     });
 
     return completion.choices[0].message.content;
@@ -215,6 +216,29 @@ const generateContent = async (
     });
   }
 
+  const scaleserpData =
+    contact.scaleserpData !== null
+      ? contact.scaleserpData
+      : JSON.stringify(
+          await scaleserp.fetchNewsData(
+            `latest+news+on+${contact.companyWebsite}`
+          )
+        );
+  if (contact.scaleserpData === null) {
+    await prisma.contact.update({
+      where: {
+        id: parseInt(contactId)
+      },
+      data: {
+        scaleserpData: scaleserpData
+      }
+    });
+  } else {
+  }
+
+  const organic_results = JSON.parse(scaleserpData).organic_results
+    ? JSON.parse(scaleserpData).organic_results.slice(0, 5)
+    : [];
   const personSenderData =
     user.apolloData !== null
       ? user.apolloData
@@ -280,8 +304,14 @@ const generateContent = async (
   **The recipient should be interested in the email and should be willing to respond to it.
   **The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
   **The sender name is ${creatorFirstName} ${creatorLastName} and the sender email is ${creatorEmail}
-  **The summary of the company website is as follows:
+  **Make sure to reason based on the company profile as per the website summary as follows:
+  ### start of summary
   ${websiteSummary}
+  ### end of summary
+  **Mention about a recent news or blogs to personalize from the following web results:
+  ### start of web data
+  ${organic_results}
+  ### end of web data
   **Make sure the number of words is between ${minWords} and ${maxWords}
   `;
 

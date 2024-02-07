@@ -145,7 +145,6 @@ function ContactList({ searchTerm }: { searchTerm: string }) {
                 <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-700">
                   <a
                     href={`/campaign/${campaign.id}`}
-                    target="_blank"
                     className="text-blue-500 hover:text-blue-800"
                   >
                     <FontAwesomeIcon

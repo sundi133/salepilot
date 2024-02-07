@@ -36,6 +36,7 @@ model Contact {
   creatorEmail String?
   creatorName String?
   apolloData      Json?
+  scaleserpData Json?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   EmailEvent      EmailEvent[]

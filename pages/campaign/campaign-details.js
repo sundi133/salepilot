@@ -195,7 +195,6 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
         </div>
       </div>
 
-      <h2 className="text-lg font-semibold mb-4">Generated Emails</h2>
       <div className="relative flex items-center w-full">
         {' '}
         <input
@@ -227,9 +226,17 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
 
       {emailEvents.length > 0 ? (
         <div className="space-y-6 mt-4">
+          <hr className="border-t border-gray-300 my-4 mt-2" />
           {emailEvents.map((event) => (
             <div className="bg-white p-4 shadow rounded-lg mb-2">
-              <div className="mb-4">
+              {event.contact?.apolloData && event.contact?.scaleserpData && (
+                <ProfileCard
+                  data={JSON.parse(event.contact.apolloData)}
+                  organic_results={JSON.parse(event.contact.scaleserpData)}
+                />
+              )}
+
+              <div className="mb-2 mt-4">
                 <span className="text-gray-900 font-semibold">To:</span>
                 <span className="text-gray-900 ml-2">
                   {event.contact.email}
@@ -272,10 +279,6 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
                 </button>
               </div>
 
-              {event.contact?.apolloData && (
-                <ProfileCard data={JSON.parse(event.contact.apolloData)} />
-              )}
-
               <hr className="border-t border-gray-300 my-4 mt-2" />
 
               {/* <div className="text-gray-700">
@@ -296,7 +299,7 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
           ))}
         </div>
       ) : (
-        <p>No email events found for this campaign.</p>
+        <p>Loading...</p>
       )}
     </main>
   );
