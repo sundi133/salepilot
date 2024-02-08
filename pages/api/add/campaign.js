@@ -121,9 +121,9 @@ const generateEmailContent = async (key, templateContent, userPrompt) => {
         {
           role: 'system',
           content: `
-            You are an email generator who is generating a email message based on a template. 
-            **Never change the text which is between the {{fixed_text_start}} and {{fixed_text_end}}.
-            **The template is as follows:
+            You are an email generator who is generating a email message based on a provided template. 
+            ** Respect the Untouchables: Any text between {{fixed_text_start}} and {{fixed_text_end}} should remain same and keep it exactly as it is.
+            ** Personalize the email based on the following template:
             ### start of template
             ${templateContent}   
             ### end of template
@@ -305,26 +305,33 @@ const generateContent = async (
   const minWords = template.minWords || 150;
   const maxWords = template.maxWords || 300;
   const tone = template.tone || 'professional';
-  const userPrompt = `Generate an email to send to ${firstName} using the provided template in a ${tone} tone. 
-  **The email should be personalized to the recipient such that it would increase the likelihood of a positive response from the recipient.
-  **Make sure to mention about how our company can help them to achieve their goals.
-  **Make sure the number of words is between ${minWords} and ${maxWords}
-  **Make sure the text output is plain in terms of colors, fonts and formatting.
-  **The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
-  **The sender name is ${creatorFirstName} ${creatorLastName} and the sender email is ${creatorEmail}
-  
-  **The email should have a personal touch based on the common attributes in order of common company, roles, titles and other professional attributes. The attributes are as follows:
-  ### start of common attributes
-  ${commonAttributes}.
-  ### end of common attributes
-  **The email should have a personal touch based on the company's summary as follows:
-  ### start of summary
-  ${websiteSummary}
-  ### end of summary
-  **The email should have a personal touch from a recent news or blogs to personalize from the following web results:
-  ### start of web data
-  ${organic_results}
-  ### end of web data
+  const userPrompt = `
+  **Generate an email to ${firstName} using the provided template in a ${tone} tone.**
+  **Personalize the email** to increase the likelihood of a positive response by:
+  * Highlighting how our partnership can help them achieve their goals.
+  * Personalize by mentioning commonalities between the sender and receipient share (company, roles, titles, etc.). Extract the commonalities from the following:
+    ### start of common attributes 
+    ${commonAttributes} 
+    ### end of common attributes.
+  * Personalize the message based their company's product / services which is as follows:
+    ### start of summary 
+    ${websiteSummary} 
+    ### end of summary.
+  * Personalize by referencing recent news or blog topics which are as follows:
+    ### start of web data
+    ${organic_results}
+     ### end of web data.
+
+  **Target word count:** ${minWords} - ${maxWords}.
+
+  **Sender:** ${creatorFirstName} <span class="math-inline">\{creatorLastName\} \(<</span>{creatorEmail}>).
+
+  **Recipient:** ${contact.jobTitle} at ${contact.company}.
+
+  **End with a clear call to action.
+
+  **Note:** The email should be plain text, free of colors, fonts, and formatting.
+
   `;
 
   const result = await generateEmailContent(key, templateContent, userPrompt);

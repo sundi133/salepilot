@@ -145,7 +145,7 @@ function TemplateForm() {
   const [selectedTemplate, setSelectedTemplate] = useState(
     'The Direct Approach'
   );
-  const [minimumWords, setMinimumWords] = useState(150);
+  const [minimumWords, setMinimumWords] = useState(200);
   const [maximumWords, setMaximumWords] = useState(250);
   const [followUpDelay, setFollowUpDelay] = useState(1);
   const [followUpContent, setFollowUpContent] = useState('');
