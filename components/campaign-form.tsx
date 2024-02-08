@@ -142,7 +142,7 @@ function CampaignForm() {
       const data = await response.json();
       setCampaign(data.data);
       setCampaignId(data.data.id);
-      setSuccessMessage('Campaign created successfully, generating emails...');
+      setSuccessMessage('Campaign created successfully, generating emails.');
     } catch (error) {
       setErrorMessage('Failed to create campaign.');
       console.error('There was an error!', error);
@@ -325,7 +325,7 @@ function CampaignForm() {
           </div>
         ) : (
           campaignId >= 0 && (
-            <div className="w-full max-w-8xl mx-auto">Generating email...</div>
+            <div className="w-full max-w-8xl mx-auto">Generating emails.</div>
           )
         )}
 

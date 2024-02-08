@@ -145,8 +145,8 @@ function TemplateForm() {
   const [selectedTemplate, setSelectedTemplate] = useState(
     'The Direct Approach'
   );
-  const [minimumWords, setMinimumWords] = useState(100);
-  const [maximumWords, setMaximumWords] = useState(200);
+  const [minimumWords, setMinimumWords] = useState(150);
+  const [maximumWords, setMaximumWords] = useState(250);
   const [followUpDelay, setFollowUpDelay] = useState(1);
   const [followUpContent, setFollowUpContent] = useState('');
   const [showFollowUpConfig, setShowFollowUpConfig] = useState(false);
@@ -254,7 +254,9 @@ function TemplateForm() {
     '{{ai_personalize}}',
     '{{company_website}}',
     '{{tone}}',
-    '{{sender_email_signature}}'
+    '{{fixed_text_start}}',
+    '{{fixed_text_end}}'
+    //'{{recent_public_news}}'
   ];
 
   const [followUps, setFollowUps] = useState<FollowUpConfig[]>([]);
@@ -506,7 +508,7 @@ function TemplateForm() {
           </div>
         )}
         {successMessage && (
-          <div className="flex flex-wrap w-full px-2 mb-4 text-green-500">
+          <div className="flex flex-wrap w-full px-2 mb-4 text-blue-600">
             {successMessage}
           </div>
         )}

@@ -121,11 +121,20 @@ const generateEmailContent = async (key, templateContent, userPrompt) => {
         {
           role: 'system',
           content: `
-            You are an email generator who is reaching out to a prospect. You have been given a template to use for the email. The template is as follows:
-            ${templateContent}
-          `
+            You are an email generator who is generating a email message based on a template. 
+            **Never change the text which is between the {{fixed_text_start}} and {{fixed_text_end}}.
+            **The template is as follows:
+            ### start of template
+            ${templateContent}   
+            ### end of template
+            `
         },
-        { role: 'user', content: userPrompt }
+        {
+          role: 'user',
+          content: `
+        
+        ${userPrompt}`
+        }
       ],
       temperature: 0,
       frequency_penalty: 0,
@@ -297,23 +306,25 @@ const generateContent = async (
   const maxWords = template.maxWords || 300;
   const tone = template.tone || 'professional';
   const userPrompt = `Generate an email to send to ${firstName} using the provided template in a ${tone} tone. 
-  **The email should be personalized to the recipient and should be professional.
-  **The email should have a personal touch based on the common attributes ${commonAttributes}.
-  **Make sure to mention about common professional attributes between the sender and the receiver in order of common company, roles, titles and other professional attributes.
-  **Make sure the make the email personalized as per the recipient and the company, company details and how our company can help them.
-  **The recipient should be interested in the email and should be willing to respond to it.
+  **The email should be personalized to the recipient such that it would increase the likelihood of a positive response from the recipient.
+  **Make sure to mention about how our company can help them to achieve their goals.
+  **Make sure the number of words is between ${minWords} and ${maxWords}
+  **Make sure the text output is plain in terms of colors, fonts and formatting.
   **The recepient title is ${contact.jobTitle} and the company name is ${contact.company}
   **The sender name is ${creatorFirstName} ${creatorLastName} and the sender email is ${creatorEmail}
-  **Make sure to reason based on the company profile as per the website summary as follows:
+  
+  **The email should have a personal touch based on the common attributes in order of common company, roles, titles and other professional attributes. The attributes are as follows:
+  ### start of common attributes
+  ${commonAttributes}.
+  ### end of common attributes
+  **The email should have a personal touch based on the company's summary as follows:
   ### start of summary
   ${websiteSummary}
   ### end of summary
-  **Mention about a recent news or blogs to personalize from the following web results:
+  **The email should have a personal touch from a recent news or blogs to personalize from the following web results:
   ### start of web data
   ${organic_results}
   ### end of web data
-  **Make sure the number of words is between ${minWords} and ${maxWords}
-  **Make sure the text output is plain in terms of colors, fonts and formatting.
   `;
 
   const result = await generateEmailContent(key, templateContent, userPrompt);
