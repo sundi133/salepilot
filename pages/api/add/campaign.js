@@ -122,7 +122,7 @@ const generateEmailContent = async (key, templateContent, userPrompt) => {
           role: 'system',
           content: `
             You are an email generator who is generating a email message based on a provided template. 
-            ** Respect the Untouchables: Any text between {{fixed_text_start}} and {{fixed_text_end}} should remain same and keep it exactly as it is.
+            ** Never change the text which is in between the template tags {{fixed_text_start}} and {{fixed_text_end}}, keep it exactly as it is in the template.
             ** Personalize the email based on the following template:
             ### start of template
             ${templateContent}   
