@@ -26,6 +26,17 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
   const tableBodyExpandedCellStyle =
     'px-6 py-4 leading-5 bg-white text-sm text-gray-900 whitespace-no-wrap leading-5';
 
+  if (!session) {
+    return null;
+  }
+
+  if (!campaign_id) {
+    return <div>No campaign ID provided</div>;
+  }
+  if (!session.lastActiveOrganizationId) {
+    return <div>Loading...</div>;
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       await fetchEmails();
@@ -45,18 +56,11 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
     }
   }, [session, status]); // Add status as a dependency
 
-  if (!session) {
-    return null;
-  }
-
-  if (!campaign_id) {
-    return <div>No campaign ID provided</div>;
-  }
   const fetchCampaignData = async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `/api/campaigns?campaignId=${campaign_id}`
+        `/api/campaigns?campaignId=${campaign_id}&orgId=${session.lastActiveOrganizationId}`
       );
 
       const data = response.data;
@@ -72,7 +76,7 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/email-events?campaignId=${campaign_id}`
+        `/api/email-events?campaignId=${campaign_id}&orgId=${session?.lastActiveOrganizationId}`
       );
       if (!response.ok) throw new Error('Failed to fetch email events.');
       const data = await response.json();
@@ -251,11 +255,13 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
                   To: {event.contact.email}
                 </div>
                 <div
-                  className="text-gray-700 bg-gray-50 p-4 rounded-lg mt-4"
+                  contentEditable
                   dangerouslySetInnerHTML={{
                     __html: event.eventContent.replace(/\n\n/g, '<br /><br />')
                   }}
+                  className="outline-none"
                 ></div>
+
                 <div
                   key={event.id}
                   className="bg-white p-4 shadow rounded-lg mb-2"

@@ -20,7 +20,6 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const data = req.body;
-    data.orgId = orgId;
     data.creatorEmail = creatorEmail;
     data.creatorName = name;
 
@@ -28,7 +27,7 @@ export default async function handler(req, res) {
       const existingContact = await prisma.contact.findFirst({
         where: {
           email: data.email,
-          orgId: orgId
+          orgId: data.orgId
         }
       });
       if (existingContact) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import EmailEventsDisplay from './email-event-display';
+import { useClerk } from '@clerk/nextjs';
 
 interface Contact {
   id: number;
@@ -40,6 +41,8 @@ function CampaignForm() {
 
   const [emailError, setEmailError] = useState('');
 
+  const { session } = useClerk();
+
   // Function to validate the business email
   const validateEmail = (email: string) => {
     const freeEmailDomains = [
@@ -71,7 +74,9 @@ function CampaignForm() {
       setIsLoading(true);
       try {
         // Replace with your actual endpoint
-        const response = await fetch('/api/contacts');
+        const response = await fetch(
+          `/api/contacts?orgId=${session?.lastActiveOrganizationId}`
+        );
         if (!response.ok) throw new Error('Network response was not ok.');
         const data = await response.json();
         setContacts(data);
@@ -85,7 +90,9 @@ function CampaignForm() {
 
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('/api/templates');
+        const response = await fetch(
+          `/api/templates?orgId=${session?.lastActiveOrganizationId}`
+        );
         if (!response.ok) throw new Error('Failed to fetch templates');
         const data = await response.json();
         setTemplates(data);
@@ -127,7 +134,8 @@ function CampaignForm() {
           status: 'created',
           numUsers: selectedContacts.length,
           creatorEmail,
-          emailContent
+          emailContent,
+          orgId: session?.lastActiveOrganizationId
         })
       });
       if (!response.ok) throw new Error('Network response was not ok.');
@@ -238,9 +246,7 @@ function CampaignForm() {
 
         <div className="flex w-full px-2 mb-4 space-x-4 mt-4">
           <div className="flex-1">
-            <label className="block text-gray-700 font-bold mb-2">
-              Search Contacts
-            </label>
+            <label className="block text-gray-700 mb-2">Search Contacts</label>
             <input
               type="text"
               value={searchTerm}
@@ -262,7 +268,7 @@ function CampaignForm() {
               )}
 
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200 ease-in-out"
                 type="button"
                 onClick={handleSubmit}
                 disabled={isLoading}

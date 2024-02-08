@@ -7,6 +7,7 @@ import type { PutBlobResult } from '@vercel/blob';
 import { put } from '@vercel/blob';
 import Link from 'next/link';
 import { c } from '@vercel/blob/dist/put-96a1f07e';
+import { useClerk } from '@clerk/nextjs';
 
 export default function Contact() {
   const [name, setName] = useState('');
@@ -20,6 +21,7 @@ export default function Contact() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [candidateId, setCandidateId] = useState('');
+  const { session } = useClerk();
 
   const handleFileImport = async (e: any) => {
     const file = e.target.files[0];
@@ -71,7 +73,8 @@ export default function Contact() {
                     company,
                     jobTitle,
                     companyWebsite,
-                    linkedIn
+                    linkedIn,
+                    orgId: session?.lastActiveOrganizationId
                   })
                 })
                   .then((response) => {

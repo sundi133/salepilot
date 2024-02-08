@@ -313,6 +313,7 @@ const generateContent = async (
   ${organic_results}
   ### end of web data
   **Make sure the number of words is between ${minWords} and ${maxWords}
+  **Make sure the text output is plain in terms of colors, fonts and formatting.
   `;
 
   const result = await generateEmailContent(key, templateContent, userPrompt);
@@ -345,7 +346,6 @@ export default async function handler(req, res) {
     const templateId = data.templateId;
     const key = process.env.OPENAI_API_KEY;
 
-    data.orgId = orgId;
     data.userId = userId;
     data.template = {
       connect: { id: data.templateId }
@@ -367,14 +367,14 @@ export default async function handler(req, res) {
       let user = await prisma.user.findMany({
         where: {
           userId: userId,
-          orgId: orgId,
+          orgId: data.orgId,
           creatorEmail: creatorEmail
         }
       });
       if (!user[0]) {
         user = await addUser({
           userId: userId,
-          orgId: orgId,
+          orgId: data.orgId,
           creatorEmail: creatorEmail,
           creatorName: creatorFirstName + ' ' + creatorLastName
         });
@@ -400,7 +400,7 @@ export default async function handler(req, res) {
           eventContent: emailContent, // This should be the content of the email
           eventType: 'Email Generated', // This should be the type of the event based on the template
           eventTime: new Date(), // Ensure eventTime is a Date object
-          orgId,
+          orgId: data.orgId,
           userId,
           commonAttributes
         };

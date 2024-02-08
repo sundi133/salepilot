@@ -43,7 +43,9 @@ function ContactList({ searchTerm }: { searchTerm: string }) {
           setObjects(searchResults);
         } else {
           // If search term is empty, use the default API route
-          const response = await axios.get(`/api/campaigns`);
+          const response = await axios.get(
+            `/api/campaigns?orgId=${session?.lastActiveOrganizationId}`
+          );
           const fetchedObjects = response.data;
           setObjects(fetchedObjects);
         }

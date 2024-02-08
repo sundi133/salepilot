@@ -15,10 +15,10 @@ export default async function handler(req, res) {
     try {
       let whereCondition = {};
 
-      if (orgId) {
-        whereCondition = { orgId: orgId };
+      if (req.query.orgId) {
+        whereCondition = { orgId: req.query.orgId };
       } else if (templatedId) {
-        whereCondition = { orgId: orgId, id: parseInt(templatedId) };
+        whereCondition = { orgId: req.query.orgId, id: parseInt(templatedId) };
       } else {
         res.status(400).json({ error: 'Missing required parameters' });
       }

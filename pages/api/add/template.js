@@ -20,7 +20,6 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const data = req.body;
-    data.orgId = orgId;
     data.userId = userId;
     data.creatorEmail = creatorEmail;
     data.creatorName = name;

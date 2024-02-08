@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
-  if (!orgId) {
+  if (!req.query.orgId) {
     res.status(400).json({ error: 'Missing required parameters' });
     return;
   }
@@ -17,7 +17,10 @@ export default async function handler(req, res) {
     const campaignId = req.query.campaignId;
 
     try {
-      let whereCondition = { orgId: orgId, campaignId: parseInt(campaignId) };
+      let whereCondition = {
+        orgId: req.query.orgId,
+        campaignId: parseInt(campaignId)
+      };
 
       const emailEvents = await prisma.emailEvent.findMany({
         where: whereCondition,

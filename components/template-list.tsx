@@ -44,7 +44,9 @@ function TemplateList({ searchTerm }: { searchTerm: string }) {
           setObjects(searchResults);
         } else {
           // If search term is empty, use the default API route
-          const response = await axios.get(`/api/templates`);
+          const response = await axios.get(
+            `/api/templates?orgId=${session?.lastActiveOrganizationId}`
+          );
           const fetchedObjects = response.data;
           setObjects(fetchedObjects);
         }

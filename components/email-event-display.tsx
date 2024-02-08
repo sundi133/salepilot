@@ -4,6 +4,8 @@ import Dot from './dot';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import ProfileCard from './ProfileCard'; // Adjust the import path based on your file structure
+import { useAuth } from '@clerk/nextjs';
+import { useClerk } from '@clerk/nextjs';
 
 interface Contact {
   email: string;
@@ -51,7 +53,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/email-events?campaignId=${campaignId}`
+        `/api/email-events?campaignId=${campaignId}&orgId=${session?.lastActiveOrganizationId}`
       );
       if (!response.ok) throw new Error('Failed to fetch email events.');
       const emailData = await response.json();
@@ -66,11 +68,15 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
     }
   };
 
+  const { session } = useClerk();
+
   useEffect(() => {
     const fetchCampaign = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/campaigns?campaignId=${campaignId}`);
+        const response = await fetch(
+          `/api/campaigns?campaignId=${campaignId}&orgId=${session?.lastActiveOrganizationId}`
+        );
         if (!response.ok) throw new Error('Failed to fetch campaign data.');
         const data = await response.json();
         if (data.length > 0) {
@@ -194,9 +200,9 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
           <div className="flex justify-start">
             <button
               onClick={downloadEmailEventsCSV}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 ease-in-out"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200 ease-in-out"
             >
-              <FontAwesomeIcon icon={faDownload} /> Download CSV
+              <FontAwesomeIcon icon={faDownload} /> Download
             </button>
           </div>
           <div className="space-y-6 mt-4"></div>
@@ -219,6 +225,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
 
             <div className="text-gray-800 mt-2">To: {event.contact.email}</div>
             <div
+              contentEditable
               className="text-gray-700 bg-gray-50 p-4 rounded-lg mt-4"
               dangerouslySetInnerHTML={{
                 __html: event.eventContent.replace(/\n\n/g, '<br /><br />')
@@ -228,6 +235,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
               <div className="text-right space-x-2 mt-4">
                 <button
                   onClick={() => handleCopy(event.id, event)}
+                  type="button"
                   className={`bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded ${
                     copiedStatuses[event.id]
                       ? 'bg-green-600 hover:bg-green-700'
@@ -237,6 +245,7 @@ const EmailEventsDisplay: React.FC<EmailEventsDisplayProps> = ({
                   {copiedStatuses[event.id] ? 'Copied' : 'Copy'}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSendEmail(event)}
                   className="bg-green-600 hover:bg-green-700 text-white py-1 px-4 rounded"
                 >

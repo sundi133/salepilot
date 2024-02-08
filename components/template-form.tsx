@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useClerk } from '@clerk/nextjs';
 
 interface Contact {
   id: number;
@@ -150,6 +151,8 @@ function TemplateForm() {
   const [followUpContent, setFollowUpContent] = useState('');
   const [showFollowUpConfig, setShowFollowUpConfig] = useState(false);
 
+  const { session } = useClerk();
+
   // Update email content when the selected template changes
   const handleTemplateChange = (e: any) => {
     const selected = emailTemplates.find(
@@ -228,7 +231,8 @@ function TemplateForm() {
           content: emailContent,
           tone,
           minWords: minimumWords,
-          maxWords: maximumWords
+          maxWords: maximumWords,
+          orgId: session?.lastActiveOrganizationId
         })
       });
       if (!response.ok) throw new Error('Network response was not ok.');
