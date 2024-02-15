@@ -112,7 +112,7 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
   const downloadEmailEventsCSV = () => {
     const csvRows = [
       // Define CSV headers
-      `"ID","Email","Company","Event Content"`
+      `"ID","Email","Name","LinkedIn","Company","Event Content"`
     ];
 
     // Iterate over email events and convert each to a CSV row
@@ -120,6 +120,8 @@ const CampaignDetails = ({ campaign_id: campaign_id }) => {
       const csvRow = [
         `"${event.id}"`,
         `"${event.contact.email}"`,
+        `"${event.contact.firstName} ${event.contact.lastName}"`,
+        `"${event.contact.linkedIn}"`,
         `"${event.contact.company}"`,
         `"${event.eventContent.replace(/"/g, '""')}"` // Escape double quotes
       ].join(',');

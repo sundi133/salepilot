@@ -348,25 +348,29 @@ const generateContent = async (
   const userPrompt = `
   **Generate an email to ${firstName} using the provided template in a ${tone} tone.**
   **Personalize the email** to increase the likelihood of a positive response by:
+  
   ** Highlighting how our partnership can help them achieve their goals.
+  
   ** Personalize by mentioning commonalities between the sender and receipient share (company, roles, titles, etc.). Extract the commonalities from the following:
     ### start of common attributes 
     ${commonAttributes} 
     ### end of common attributes.
-  ** Personalize the message based their receiver's company's product / services which is as follows:
+
+    ** Personalize by mentioning about their recent news which is as follows:
+    ### start of recent news
+    ${organic_results}
+    ### end of recent news
+
+    ** Personalize the message based their receiver's company's product / services which is as follows:
     ### start of summary 
     ${websiteSummary} 
     ### end of summary.
-  ** Personalize the message based their sender's product / services which is as follows:
-  ### start of summary 
-  ${productSummary} 
-  ### end of summary.
+   
+    ** Personalize the message based their sender's product or services which is as follows
+    ### start of summary 
+    ${productSummary} 
+    ### end of summary.
   
-  ** Personalize by referencing recent news from web data which is as follows:
-    ### start of web data news
-    ${organic_results}
-    ### end of web data news
-
   ** Target word count:** ${minWords} - ${maxWords}.
 
   **Sender:** ${creatorFirstName} <span class="math-inline">\{creatorLastName\} \(<</span>{creatorEmail}>).
@@ -381,8 +385,8 @@ const generateContent = async (
 
   let result = await generateEmailContent(key, templateContent, userPrompt);
   result = result
-    .replace('{{fixed_text_start}}', '')
-    .replace('{{fixed_text_end}}', '');
+    .replaceAll('{{fixed_text_start}}', '')
+    .replaceAll('{{fixed_text_end}}', '');
   return [result, commonAttributes];
 };
 
