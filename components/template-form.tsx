@@ -217,6 +217,8 @@ function TemplateForm() {
   const handleSubmit = async (e: any) => {
     console.log('selectedContacts', selectedContacts);
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {

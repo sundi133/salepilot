@@ -14,66 +14,102 @@ const prisma = require('../../../components/prisma-client');
 import apollo from '../../../components/utils/apollo';
 import scaleserp from '../../../components/utils/scaleserp';
 const maxTokens = 3000;
+const puppeteer = require('puppeteer');
 
 const fetchPageContent = async (url) => {
   try {
-    const { data } = await axios.get(url);
-    return data;
+    // const { data } = axios.get(url, {
+    //   headers: {
+    //     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
+    //   }
+    // })
+    // return data;
+
+    const browser = await puppeteer.launch();
+
+    // Open a new page.
+    const page = await browser.newPage();
+
+    // Navigate to the specified URL.
+    await page.goto(url);
+
+    // Wait for the page title to load.
+    const title = await page.title();
+
+    // Log the page title.
+    console.log(`The title of the page is: ${title}`);
+
+    const htmlContent = await page.content();
+
+    // Close the browser session.
+    await browser.close();
+
+    return htmlContent;
   } catch (error) {
     console.error(`Error fetching the URL: ${url}`, error);
-    throw error;
+    return '';
   }
 };
 
 const extractInformation = (html) => {
-  // Loading the HTML content into cheerio to parse and query the document
-  const $ = cheerio.load(html);
+  try {
+    // Loading the HTML content into cheerio to parse and query the document
+    const $ = cheerio.load(html);
 
-  // Extracting the title of the webpage
-  const title = $('title').text();
-  const description = $('meta[name="description"]').attr('content');
-  const ogTitle = $('meta[property="og:title"]').attr('content');
-  const ogDescription = $('meta[property="og:description"]').attr('content');
+    // Extracting the title of the webpage
+    const title = $('title').text();
+    const description = $('meta[name="description"]').attr('content');
+    const ogTitle = $('meta[property="og:title"]').attr('content');
+    const ogDescription = $('meta[property="og:description"]').attr('content');
 
-  // extract all the text from the page
-  const bodyText = $('body').text();
-  let divTexts = [];
-  $('div').each((i, elem) => {
-    divTexts.push($(elem).text().trim());
-  });
+    // extract all the text from the page
+    const bodyText = $('body').text();
+    let divTexts = [];
+    $('div').each((i, elem) => {
+      divTexts.push($(elem).text().trim());
+    });
 
-  let pTexts = [];
-  $('p').each((i, elem) => {
-    pTexts.push($(elem).text().trim());
-  });
+    let pTexts = [];
+    $('p').each((i, elem) => {
+      pTexts.push($(elem).text().trim());
+    });
 
-  let aTexts = [];
-  $('a').each((i, elem) => {
-    aTexts.push($(elem).text().trim());
-  });
+    let aTexts = [];
+    $('a').each((i, elem) => {
+      aTexts.push($(elem).text().trim());
+    });
 
-  let h1Texts = [];
-  $('h1').each((i, elem) => {
-    h1Texts.push($(elem).text().trim());
-  });
+    let h1Texts = [];
+    $('h1').each((i, elem) => {
+      h1Texts.push($(elem).text().trim());
+    });
 
-  let h2Texts = [];
-  $('h2').each((i, elem) => {
-    h2Texts.push($(elem).text().trim());
-  });
+    let h2Texts = [];
+    $('h2').each((i, elem) => {
+      h2Texts.push($(elem).text().trim());
+    });
 
-  return `
+    return `
   Title: ${title} ${ogTitle}
   Description: ${description} ${ogDescription}
-  Body Text: ${bodyText} ${divTexts.join(' ')} ${pTexts.join(
-    ' '
-  )} ${aTexts.join(' ')} ${h1Texts.join(' ')} ${h2Texts.join(' ')}
-  `;
+  Body Text: ${bodyText}`;
+    //${divTexts.join(' ')} ${pTexts.join(
+    //   ' '
+    // )} ${aTexts.join(' ')} ${h1Texts.join(' ')} ${h2Texts.join(' ')}
+  } catch (error) {
+    console.error('Error extracting information:', error);
+    return '';
+  }
 };
 
 const getWebsiteSummary = async (url) => {
+  if (url.startsWith('http://')) {
+    url = url.replace('http://', 'https://');
+  }
+  console.log('URL:', url);
   const htmlContent = await fetchPageContent(url);
   const info = extractInformation(htmlContent);
+  console.log('Info:', info);
   return info;
 };
 
@@ -190,7 +226,8 @@ const generateContent = async (
   creatorLastName,
   creatorEmail,
   user,
-  emailTemplateContent
+  emailTemplateContent,
+  productSummary
 ) => {
   const contact = await prisma.contact.findUnique({
     where: {
@@ -207,12 +244,13 @@ const generateContent = async (
   const firstName = contact.firstName || '';
   const lastName = contact.lastName || '';
   const email = contact.email || '';
+  const linkedIn = contact.linkedIn || '';
 
   const personReceiverData =
     contact.apolloData !== null
       ? contact.apolloData
       : JSON.stringify(
-          await apollo.fetchPersonData(firstName, lastName, email)
+          await apollo.fetchPersonData(firstName, lastName, email, linkedIn)
         );
   if (!contact.apolloData) {
     await prisma.contact.update({
@@ -248,6 +286,7 @@ const generateContent = async (
   const organic_results = JSON.parse(scaleserpData).organic_results
     ? JSON.parse(scaleserpData).organic_results.slice(0, 5)
     : [];
+  console.log('Organic Results:', organic_results);
   const personSenderData =
     user.apolloData !== null
       ? user.apolloData
@@ -255,7 +294,8 @@ const generateContent = async (
           await apollo.fetchPersonData(
             creatorFirstName,
             creatorLastName,
-            creatorEmail
+            creatorEmail,
+            ''
           )
         );
   if (user.apolloData === null) {
@@ -308,21 +348,26 @@ const generateContent = async (
   const userPrompt = `
   **Generate an email to ${firstName} using the provided template in a ${tone} tone.**
   **Personalize the email** to increase the likelihood of a positive response by:
-  * Highlighting how our partnership can help them achieve their goals.
-  * Personalize by mentioning commonalities between the sender and receipient share (company, roles, titles, etc.). Extract the commonalities from the following:
+  ** Highlighting how our partnership can help them achieve their goals.
+  ** Personalize by mentioning commonalities between the sender and receipient share (company, roles, titles, etc.). Extract the commonalities from the following:
     ### start of common attributes 
     ${commonAttributes} 
     ### end of common attributes.
-  * Personalize the message based their company's product / services which is as follows:
+  ** Personalize the message based their receiver's company's product / services which is as follows:
     ### start of summary 
     ${websiteSummary} 
     ### end of summary.
-  * Personalize by referencing recent news or blog topics which are as follows:
-    ### start of web data
+  ** Personalize the message based their sender's product / services which is as follows:
+  ### start of summary 
+  ${productSummary} 
+  ### end of summary.
+  
+  ** Personalize by referencing recent news from web data which is as follows:
+    ### start of web data news
     ${organic_results}
-     ### end of web data.
+    ### end of web data news
 
-  **Target word count:** ${minWords} - ${maxWords}.
+  ** Target word count:** ${minWords} - ${maxWords}.
 
   **Sender:** ${creatorFirstName} <span class="math-inline">\{creatorLastName\} \(<</span>{creatorEmail}>).
 
@@ -334,7 +379,10 @@ const generateContent = async (
 
   `;
 
-  const result = await generateEmailContent(key, templateContent, userPrompt);
+  let result = await generateEmailContent(key, templateContent, userPrompt);
+  result = result
+    .replace('{{fixed_text_start}}', '')
+    .replace('{{fixed_text_end}}', '');
   return [result, commonAttributes];
 };
 
@@ -359,9 +407,16 @@ export default async function handler(req, res) {
     const creatorEmail = data.creatorEmail
       ? data.creatorEmail
       : user.emailAddresses[0].emailAddress;
+
+    const creatorName = data.creatorName.split(' ');
+    const creatorFirstName = creatorName[0];
+    const creatorLastName = creatorName.slice(1).join(' ');
+
     const emailTemplateContent = data.emailContent;
     const contactIds = data.contacts;
     const templateId = data.templateId;
+    const productSummary = data.productSummary;
+
     const key = process.env.OPENAI_API_KEY;
 
     data.userId = userId;
@@ -373,6 +428,8 @@ export default async function handler(req, res) {
     delete data.contacts;
     delete data.creatorEmail;
     delete data.emailContent;
+    delete data.creatorName;
+    delete data.productSummary;
 
     try {
       const campaign = await addCampaign(data); // Use Prisma service to insert data
@@ -386,7 +443,8 @@ export default async function handler(req, res) {
         where: {
           userId: userId,
           orgId: data.orgId,
-          creatorEmail: creatorEmail
+          creatorEmail: creatorEmail,
+          creatorName: creatorFirstName + ' ' + creatorLastName
         }
       });
       if (!user[0]) {
@@ -410,7 +468,8 @@ export default async function handler(req, res) {
           creatorLastName,
           creatorEmail,
           user,
-          emailTemplateContent
+          emailTemplateContent,
+          productSummary
         );
         const tuple = {
           campaignId: campaign.id,

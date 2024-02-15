@@ -23,7 +23,35 @@ export default function Contact() {
   const [candidateId, setCandidateId] = useState('');
   const { session } = useClerk();
 
+  function customSplit(line: any) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (const char of line) {
+      if (char === '"' && inQuotes) {
+        // Ending a quoted section
+        inQuotes = false;
+      } else if (char === '"' && !inQuotes) {
+        // Starting a quoted section
+        inQuotes = true;
+      } else if (char === ',' && !inQuotes) {
+        // Split point
+        result.push(current);
+        current = '';
+        continue;
+      }
+      current += char;
+    }
+
+    // Add the last field
+    result.push(current);
+
+    return result;
+  }
+
   const handleFileImport = async (e: any) => {
+    console.log('handleFileImport');
     const file = e.target.files[0];
     if (file) {
       setIsLoading(true);
@@ -44,6 +72,7 @@ export default function Contact() {
           lines.forEach((line: string) => {
             if (line.trim() === '') return;
             if (line.includes(',')) {
+              const fields = customSplit(line);
               const [
                 firstName,
                 lastName,
@@ -53,11 +82,11 @@ export default function Contact() {
                 jobTitle,
                 companyWebsite,
                 linkedIn
-              ] = line.split(',');
+              ] = fields;
 
-              if (firstName === '' && lastName === '') return;
-              if (email === '') return;
-              if (!email.includes('@')) return;
+              // if (firstName === '' && lastName === '') return;
+              // if (email === '') return;
+              // if (!email.includes('@')) return;
 
               try {
                 const promise = fetch('/api/add/contact', {
@@ -91,7 +120,11 @@ export default function Contact() {
               }
             }
           });
-
+          if (promises.length === 0) {
+            setErrorMessage('No valid rows found');
+            setIsLoading(false);
+            return;
+          }
           Promise.all(promises)
             .then(() => {
               setSuccessMessage('Contacts are added successfully');

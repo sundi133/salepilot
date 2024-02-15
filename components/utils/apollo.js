@@ -5,13 +5,26 @@ if (!apolloApiKey) {
   throw new Error('apolloApiKey key not found');
 }
 
-export const fetchPersonData = (firstName, lastName, email) => {
-  const data = {
+export const fetchPersonData = (
+  firstName,
+  lastName,
+  email,
+  linkedInProfileUrl = ''
+) => {
+  let data = {
     api_key: apolloApiKey,
     //first_name: firstName,
     //last_name: lastName,
     email: email
   };
+  if (email === undefined || email === null || email === '') {
+    data = {
+      api_key: apolloApiKey,
+      first_name: firstName,
+      last_name: lastName,
+      linkedin_url: linkedInProfileUrl
+    };
+  }
 
   return fetch(url, {
     method: 'POST', // or 'PUT'

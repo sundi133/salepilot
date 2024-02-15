@@ -38,7 +38,8 @@ function CampaignForm() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
   const [creatorEmail, setCreatorEmail] = useState('');
-
+  const [creatorName, setCreatorName] = useState('');
+  const [productSummary, setProductSummary] = useState('');
   const [emailError, setEmailError] = useState('');
 
   const { session } = useClerk();
@@ -134,6 +135,7 @@ function CampaignForm() {
           status: 'created',
           numUsers: selectedContacts.length,
           creatorEmail,
+          creatorName,
           emailContent,
           orgId: session?.lastActiveOrganizationId
         })
@@ -194,10 +196,27 @@ function CampaignForm() {
                 required
               />
             </div>
+          </div>
 
+          <div className="flex flex-wrap -mx-2 mb-4">
             <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
               <label className="block text-gray-700 font-bold mb-2">
-                Your Business Email
+                Your Sender Name
+              </label>
+              <input
+                type="text"
+                value={creatorName}
+                onChange={(e) => setCreatorName(e.target.value)}
+                className="w-full border rounded-lg p-3 text-gray-700"
+                required
+              />
+              {emailError && (
+                <p className="text-red-500 text-xs mt-1">{emailError}</p>
+              )}
+            </div>
+            <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+              <label className="block text-gray-700 font-bold mb-2">
+                Your Sender Business Email
               </label>
               <input
                 type="text"
@@ -242,6 +261,15 @@ function CampaignForm() {
               ></div>
             </div>
           </div>
+        </div>
+        <div className="flex flex-wrap w-full mt-4">
+          <textarea
+            value={productSummary}
+            onChange={(e) => setProductSummary(e.target.value)}
+            className="w-full border rounded-lg p-3 text-gray-700"
+            placeholder="Product Summary"
+            required
+          ></textarea>
         </div>
 
         <div className="flex w-full px-2 mb-4 space-x-4 mt-4">

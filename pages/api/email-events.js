@@ -8,6 +8,7 @@ export default async function handler(req, res) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
+  console.log('req.query.orgId', req.query.orgId);
   if (!req.query.orgId) {
     res.status(400).json({ error: 'Missing required parameters' });
     return;

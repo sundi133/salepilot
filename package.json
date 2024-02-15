@@ -74,6 +74,7 @@
     "postcss": "^8.4.33",
     "prisma": "^5.9.1",
     "prop-types": "^15.8.1",
+    "puppeteer": "^22.0.0",
     "react": "18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-copy-to-clipboard": "^5.1.0",
