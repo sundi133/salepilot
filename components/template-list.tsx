@@ -1,3 +1,4 @@
+```TypeScript
 import { PrismaClient } from '@prisma/client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // You need to install axios if not already installed
@@ -9,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@clerk/nextjs';
 import { useClerk } from '@clerk/nextjs';
+import DOMPurify from 'dompurify'; // Import DOMPurify for sanitization
 
 function TemplateList({ searchTerm }: { searchTerm: string }) {
   const { isLoaded, userId, sessionId, getToken } = useAuth();
@@ -32,20 +34,23 @@ function TemplateList({ searchTerm }: { searchTerm: string }) {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        // const response = await axios.get(`/api/interviews`); // Adjust the API route URL if needed
-        // const fetchedInterviews = response.data;
-        // setInterviews(fetchedInterviews);
         if (searchTerm.trim() !== '') {
           // If search term is non-empty, hit the search API
           const searchResponse = await axios.get(
-            `/api/search/templates?search=${searchTerm}`
+            `/api/search/templates`,
+            {
+              params: { search: searchTerm }
+            }
           );
           const searchResults = searchResponse.data;
           setObjects(searchResults);
         } else {
           // If search term is empty, use the default API route
           const response = await axios.get(
-            `/api/templates?orgId=${session?.lastActiveOrganizationId}`
+            `/api/templates`,
+            {
+              params: { orgId: session?.lastActiveOrganizationId }
+            }
           );
           const fetchedObjects = response.data;
           setObjects(fetchedObjects);
@@ -155,10 +160,10 @@ function TemplateList({ searchTerm }: { searchTerm: string }) {
                     >
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: template.content.replace(
+                          __html: DOMPurify.sanitize(template.content.replace(
                             /\n\n/g,
                             '<br /><br />'
-                          )
+                          ))
                         }}
                       ></div>
                     </td>
@@ -174,3 +179,4 @@ function TemplateList({ searchTerm }: { searchTerm: string }) {
 }
 
 export default TemplateList;
+```
