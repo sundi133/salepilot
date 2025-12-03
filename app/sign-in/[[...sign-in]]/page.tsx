@@ -1,3 +1,4 @@
+```TypeScript
 'use client';
 import { SignIn } from '@clerk/nextjs';
 import '../../../app/css/globals.css';
@@ -16,7 +17,7 @@ export default function Page() {
   useEffect(() => {
     const redirectUrl = getQueryParam('redirect_url');
     setAfterSignInUrl(redirectUrl ?? '/');
-    localStorage.setItem('afterSignInUrl', redirectUrl ?? '/');
+    // Removed localStorage usage to prevent sensitive data exposure
   }, []);
 
   return (
@@ -53,3 +54,4 @@ export default function Page() {
     </div>
   );
 }
+```
