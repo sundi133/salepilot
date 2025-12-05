@@ -27,19 +27,46 @@ function InterviewDetails() {
   const [hasFetchedData, setHasFetchedData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { isLoaded, user } = useAuth();
+
   useEffect(() => {
+    // Security Fix: Ensure user is authenticated before fetching candidate data
+    if (!isLoaded) return;
+    if (!user) return;
+
     if (id && !hasFetchedData) {
       (async () => {
         try {
           setIsLoading(true);
-          const candidateResponse = await fetch(`/api/candidate/${id}`);
+
+          // Security Fix: Pass the user's auth token in the request headers to enforce access control on the API
+          const token = await user.getToken();
+
+          const candidateResponse = await fetch(`/api/candidate/${id}`, {
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              'Content-Type': 'application/json'
+            }
+          });
+          if (!candidateResponse.ok) {
+            throw new Error('Unauthorized or not found');
+          }
           const candidateData = await candidateResponse.json();
           setCandidate(candidateData);
           setAvailableInterviews(candidateData.interviews);
 
           const invitationsResponse = await fetch(
-            `/api/invitations?candidateId=${parseInt(id)}`
+            `/api/invitations?candidateId=${parseInt(id)}`,
+            {
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                'Content-Type': 'application/json'
+              }
+            }
           );
+          if (!invitationsResponse.ok) {
+            throw new Error('Unauthorized or not found');
+          }
           const invitationsData = await invitationsResponse.json();
           setInvitations(invitationsData);
 
@@ -50,7 +77,7 @@ function InterviewDetails() {
         setIsLoading(false);
       })();
     }
-  }, [id]);
+  }, [id, isLoaded, user, hasFetchedData]);
 
   if (!candidate) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -63,12 +90,15 @@ function InterviewDetails() {
   async function refreshInvitations() {
     try {
       setIsLoading(true);
+      // Security Fix: Pass the user's auth token in the request headers to enforce access control on the API
+      const token = user ? await user.getToken() : null;
       const response = await fetch(
         `/api/invitations?candidateId=${parseInt(id)}`,
         {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
           }
         }
       );
@@ -89,10 +119,25 @@ function InterviewDetails() {
       // Make a POST request to your API endpoint to create an invitation
       const invitationId = generateRandomHexNumber(32);
       setSuccessMessage('Sending invitation...');
+      // Security Fix: Pass the user's auth token in the request headers to enforce access control on the API
+      const token = user ? await user.getToken() : null;
+
+      // Security Fix: Prevent IDOR by ensuring the selected interview actually belongs to the candidate
+      // Only allow creation if the selectedInterview is in candidate.interviews
+      const interviewObj = candidate.interviews.find(
+        (interview) => String(interview.id) === String(selectedInterview)
+      );
+      if (!interviewObj) {
+        setSuccessMessage('Invalid interview selection.');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/send-invitation', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           candidateId: candidate.id,
@@ -111,7 +156,8 @@ function InterviewDetails() {
           {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
             }
           }
         );

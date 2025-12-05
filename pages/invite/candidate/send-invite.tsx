@@ -6,7 +6,41 @@ const InvitationPage = ({ user }: { user: any }) => {
   const [selectedInterviews, setSelectedInterviews] = useState('');
   const [availableInterviews, setAvailableInterviews] = useState([]);
 
+  // Security fix: Input validation functions
+  const isValidEmail = (email: string) => {
+    // Simple email regex for validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const areValidInterviewIds = (ids: any) => {
+    // Accepts a string or array, checks if all are numbers or valid strings (UUIDs, etc.)
+    if (Array.isArray(ids)) {
+      return ids.every(
+        (id) =>
+          (typeof id === 'string' && id.length > 0 && id.length < 100) ||
+          (typeof id === 'number' && Number.isFinite(id))
+      );
+    }
+    if (typeof ids === 'string') {
+      // Comma-separated string of IDs
+      const splitIds = ids.split(',').map((id) => id.trim());
+      return splitIds.every(
+        (id) => id.length > 0 && id.length < 100
+      );
+    }
+    return false;
+  };
+
   const handleSendInvitation = async () => {
+    // Security fix: Validate candidateEmail and selectedInterviews before sending to backend
+    if (!isValidEmail(candidateEmail)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    if (!areValidInterviewIds(selectedInterviews)) {
+      alert('Please select valid interview(s).');
+      return;
+    }
     try {
       // Make a POST request to create the invitation
       const response = await axios.post('/api/send-invitation', {
@@ -17,7 +51,8 @@ const InvitationPage = ({ user }: { user: any }) => {
       // Handle success and display a confirmation message
       console.log(response.data);
     } catch (error) {
-      console.error('Error sending invitation:', error);
+      // Security fix: Avoid logging sensitive error details to the console
+      console.error('Error sending invitation.'); 
       // Handle the error and provide feedback to the user
     }
   };
@@ -25,10 +60,9 @@ const InvitationPage = ({ user }: { user: any }) => {
   useEffect(() => {
     const fetchAvailableInterviews = async () => {
       try {
-        const creatorEmail = user.email;
-        const response = await axios.get(
-          `/api/available-interviews?creatorEmail=${creatorEmail}`
-        ); // Adjust the API route URL as needed
+        // Security fix: Do NOT send user-controlled identifiers as query parameters.
+        // The backend should use the authenticated user context to determine access.
+        const response = await axios.get('/api/available-interviews');
         const availableInterviewsData = response.data;
         setAvailableInterviews(availableInterviewsData);
       } catch (error) {
